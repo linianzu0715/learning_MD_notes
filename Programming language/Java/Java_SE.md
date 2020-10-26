@@ -1103,6 +1103,16 @@ Java 集合框架对`List`接口有两类实现：**数组（Resizable Array）*
 
 #### Arraylist的底层实现
 
+**ArrayList概述**
+
+ArrayList是基于数组实现的，是一个动态数组，其容量能自动增长，类似于C语言中的动态申请内存，动态增长内存。
+
+ArrayList不是线程安全的，只能用在单线程环境下，多线程环境下可以考虑用Collections.synchronizedList(List l)函数返回一个线程安全的ArrayList类，也可以使用concurrent并发包下的CopyOnWriteArrayList类。
+
+ArrayList实现了Serializable接口，因此它支持序列化，能够通过序列化传输，实现了RandomAccess接口，支持快速随机访问，实际上就是通过下标序号进行快速访问，实现了Cloneable接口，能被克隆
+
+
+
 
 
 #### ArrayList是否会越界，Array是否会越界
@@ -1314,7 +1324,7 @@ java.lang.ArrayIndexOutOfBoundsException: 22
 
 
 
-然后是第二种情况：使用arraylist.add(int index, object temp)方法往arraylist中添加元素出现数数组下标越界异常
+**然后是第二种情况**：使用arraylist.add(int index, object temp)方法往arraylist中添加元素出现数数组下标越界异常
 
 众所周知，Java中的arraylist的大小是随着我们添加的元素多少而变化的，于是我们习惯性的以为arraylist就是无限大的，其实不然，arraylist也是有边界的。只是Arraylist在我们加入元素的过程中会自动增加自己的容量，使得一般情况下是不会发生越界。但是如果我们使用arraylist.add(int index, object temp)方法的时候，方法要求我们输入一个索引值，但是arraylist可能还没有自动扩容到索引值那么多，因此这个时候就会发生下表越界的现象。具体arraylist是怎样进行自动扩容的需要参考arraylist的底层实现方式。
 
