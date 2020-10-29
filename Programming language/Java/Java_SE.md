@@ -933,6 +933,26 @@ Java语言提供了八种基本类型。六种数字类型（四个整数型，�
 
 
 
+### 基本类型在JVM中的存储位置：
+
+基本数据类型一定存储在栈中的吗？不是。java中的基本数据类型可能存储在栈中，也可能存储在堆内存中。基本数据类型是放在栈中还是放在堆中，这取决于基本类型在何处声明，下面对数据类型在内存中的存储问题来解释一下：
+
+**一：在方法中声明的变量，即该变量是局部变量，每当程序调用方法时，系统都会为该方法建立一个方法栈，其所在方法中声明的变量就放在方法栈中，当方法结束系统会释放方法栈，其对应在该方法中声明的变量随着栈的销毁而结束，这就局部变量只能在方法中有效的原因。**
+
+在方法中声明的变量可以是基本类型的变量，也可以是引用类型的变量。
+
+1. 当声明是基本类型的变量的时，其变量名及值（变量名及值是两个概念）是放在JAVA虚拟机栈中
+2. 当声明的是引用变量时，所声明的变量（该变量实际上是在方法中存储的是内存地址值）是放在JAVA虚拟机的栈中，该变量所指向的对象是放在堆类存中的。
+
+**二：在类中声明的变量是成员变量，也叫全局变量，放在堆中的（因为全局变量不会随着某个方法执行结束而销毁）。**
+
+同样在类中声明的变量即可是基本类型的变量 也可是引用类型的变量
+
+1. 当声明的是基本类型的变量其变量名及其值放在堆内存中的
+2. 引用类型时，其声明的变量仍然会存储一个内存地址值，该内存地址值指向所引用的对象。引用变量名和对应的对象仍然存储在相应的堆中
+
+
+
 ### String非基本类型
 
 不是，String是一个类，是java语言中的字符串。String对象是char的有序集合，并且该值是不可变得。因为java.lang.String类是final类型的，因此不能继承这个类，也不能修改。
@@ -1883,14 +1903,380 @@ array和ArrayList都有从零开始的索引，即第一个元素从第零个索
 
 #### HashMap底层实现原理
 
-**1.hashmap的数据结构**
+哈希表（hash table）也叫散列表，是一种非常重要的数据结构，应用场景及其丰富，许多缓存技术（比如memcached）的核心其实就是在内存中维护一张大的哈希表。
 
-在java编程语言中最基本的数据结构有两种，数组和链表。
-数组：查询速度快，可以根据索引查询；但插入和删除比较困难；
-链表：查询速度慢，需要遍历整个链表，但插入和删除操作比较容易。
-hashmap是数组和链表组成的，数据结构中又叫“链表散列”。
 
-![Java_hashmap_原理](/Users/linianzu/Documents/learning_MD_notes/Picture/Java_hashmap_原理.png)
+
+**什么是哈希表**
+
+在讨论哈希表之前，我们先大概了解下其他数据结构在新增，查找等基础操作执行性能
+
+**数组**：采用一段连续的存储单元来存储数据。对于指定下标的查找，时间复杂度为O(1)；通过给定值进行查找，需要遍历数组，逐一比对给定关键字和数组元素，时间复杂度为O(n)，当然，对于有序数组，则可采用二分查找，插值查找，斐波那契查找等方式，可将查找复杂度提高为O(logn)；对于一般的插入删除操作，涉及到数组元素的移动，其平均复杂度也为O(n)
+
+**线性链表**：对于链表的新增，删除等操作（在找到指定操作位置后），仅需处理结点间的引用即可，时间复杂度为O(1)，而查找操作需要遍历链表逐一进行比对，复杂度为O(n)
+
+**二叉树**：对一棵相对平衡的有序二叉树，对其进行插入，查找，删除等操作，平均复杂度均为O(logn)。
+
+**哈希表**：相比上述几种数据结构，在哈希表中进行添加，删除，查找等操作，性能十分之高，不考虑哈希冲突的情况下，仅需一次定位即可完成，时间复杂度为O(1)，接下来我们就来看看哈希表是如何实现达到惊艳的常数阶O(1)的。
+
+我们知道，数据结构的物理存储结构只有两种：**顺序存储结构**和**链式存储结构**（像栈，队列，树，图等是从逻辑结构去抽象的，映射到内存中，也这两种物理组织形式），而在上面我们提到过，在数组中根据下标查找某个元素，一次定位就可以达到，哈希表利用了这种特性，**哈希表的主干就是数组**。
+
+比如我们要新增或查找某个元素，我们通过把当前元素的关键字 通过某个函数映射到数组中的某个位置，通过数组下标一次定位就可完成操作。
+
+**存储位置 = f(关键字)**
+
+其中，这个函数f一般称为**哈希函数**，这个函数的设计好坏会直接影响到哈希表的优劣。举个例子，比如我们要在哈希表中执行插入操作：
+
+![img](https://images2015.cnblogs.com/blog/1024555/201611/1024555-20161113180447499-1953916974.png)
+
+查找操作同理，先通过哈希函数计算出实际存储地址，然后从数组中对应地址取出即可。
+
+**哈希冲突**
+
+然而万事无完美，如果两个不同的元素，通过哈希函数得出的实际存储地址相同怎么办？也就是说，当我们对某个元素进行哈希运算，得到一个存储地址，然后要进行插入的时候，发现已经被其他元素占用了，其实这就是所谓的**哈希冲突**，也叫哈希碰撞。前面我们提到过，哈希函数的设计至关重要，好的哈希函数会尽可能地保证 **计算简单**和**散列地址分布均匀,**但是，我们需要清楚的是，数组是一块连续的固定长度的内存空间，再好的哈希函数也不能保证得到的存储地址绝对不发生冲突。那么哈希冲突如何解决呢？哈希冲突的解决方案有多种:开放定址法（发生冲突，继续寻找下一块未被占用的存储地址），再散列函数法，链地址法，而HashMap即是采用了链地址法，也就是**数组+链表**的方式。
+
+**HashMap实现原理**
+
+HashMap的主干是一个Entry数组。Entry是HashMap的基本组成单元，每一个Entry包含一个key-value键值对。
+
+```java
+//HashMap的主干数组，可以看到就是一个Entry数组，初始值为空数组{}，主干数组的长度一定是2的次幂，至于为什么这么做，后面会有详细分析。
+transient Entry<K,V>[] table = (Entry<K,V>[]) EMPTY_TABLE;
+```
+
+ Entry是HashMap中的一个静态内部类。
+
+```java
+static class Entry<K,V> implements Map.Entry<K,V> {
+    final K key;
+    V value;
+    Entry<K,V> next;//存储指向下一个Entry的引用，单链表结构
+    int hash;//对key的hashcode值进行hash运算后得到的值，存储在Entry，避免重复计算
+
+    /**
+    * Creates new entry.
+    */
+    Entry(int h, K k, V v, Entry<K,V> n) {
+        value = v;
+        next = n;
+        key = k;
+        hash = h;
+    } 
+```
+
+ 所以，HashMap的整体结构如下
+
+![img](https://images2015.cnblogs.com/blog/1024555/201611/1024555-20161113235348670-746615111.png)
+
+简单来说，HashMap由数组+链表组成的，数组是HashMap的主体，链表则是主要为了解决哈希冲突而存在的，如果定位到的数组位置不含链表（当前entry的next指向null）,那么对于查找，添加等操作很快，仅需一次寻址即可；如果定位到的数组包含链表，对于添加操作，其时间复杂度为O(n)，首先遍历链表，存在即覆盖，否则新增；对于查找操作来讲，仍需遍历链表，然后通过key对象的equals方法逐一比对查找。所以，性能考虑，HashMap中的链表出现越少，性能才会越好。
+
+其他的一些字段：
+
+```java
+//实际存储的key-value键值对的个数
+transient int size;
+//阈值，当table == {}时，该值为初始容量（初始容量默认为16）；当table被填充了，也就是为table分配内存空间后，threshold一般为 capacity*loadFactory。HashMap在进行扩容时需要参考threshold，后面会详细谈到
+int threshold;
+//负载因子，代表了table的填充度有多少，默认是0.75
+final float loadFactor;
+//用于快速失败，由于HashMap非线程安全，在对HashMap进行迭代时，如果期间其他线程的参与导致HashMap的结构发生变化了（比如put，remove等操作），需要抛出异常ConcurrentModificationException
+transient int modCount;
+```
+
+HashMap有4个构造器，其他构造器如果用户没有传入 initialCapacity 和 loadFactor 这两个参数，会使用默认值
+
+initialCapacity 默认为 16 ，loadFactory 默认为 0.75.
+
+```java
+public HashMap(int initialCapacity, float loadFactor) {
+　　　　　//此处对传入的初始容量进行校验，最大不能超过MAXIMUM_CAPACITY = 1<<30(230)
+        if (initialCapacity < 0)
+            throw new IllegalArgumentException("Illegal initial capacity: " +
+                                               initialCapacity);
+        if (initialCapacity > MAXIMUM_CAPACITY)
+            initialCapacity = MAXIMUM_CAPACITY;
+        if (loadFactor <= 0 || Float.isNaN(loadFactor))
+            throw new IllegalArgumentException("Illegal load factor: " +
+                                               loadFactor);
+
+        this.loadFactor = loadFactor;
+        threshold = initialCapacity;
+　　　　　
+        init();//init方法在HashMap中没有实际实现，不过在其子类如 linkedHashMap 中就会有对应实现
+    }
+```
+
+从上面这段代码我们可以看出，在常规构造器中，没有为数组table分配内存空间（有一个入参为指定Map的构造器例外），而是在执行put操作的时候才真正构建table数组.
+
+我们来看看put操作的实现吧
+
+```java
+    public V put(K key, V value) {
+        //如果table数组为空数组{}，进行数组填充（为table分配实际内存空间），入参为threshold，此时threshold为initialCapacity 默认是1<<4(24=16)
+        if (table == EMPTY_TABLE) {
+            inflateTable(threshold);
+        }
+       //如果key为null，存储位置为table[0]或table[0]的冲突链上
+        if (key == null)
+            return putForNullKey(value);
+        int hash = hash(key);//对key的hashcode进一步计算，确保散列均匀
+        int i = indexFor(hash, table.length);//获取在table中的实际位置
+        for (Entry<K,V> e = table[i]; e != null; e = e.next) {
+        //如果该对应数据已存在，执行覆盖操作。用新value替换旧value，并返回旧value
+            Object k;
+            if (e.hash == hash && ((k = e.key) == key || key.equals(k))) {
+                V oldValue = e.value;
+                e.value = value;
+                e.recordAccess(this);
+                return oldValue;
+            }
+        }
+        modCount++;//保证并发访问时，若HashMap内部结构发生变化，快速响应失败
+        addEntry(hash, key, value, i);//新增一个entry
+        return null;
+    }
+```
+
+先来看看 inflateTable 这个方法
+
+```java
+private void inflateTable(int toSize) {
+        // capacity一定是2的次幂
+        int capacity = roundUpToPowerOf2(toSize);
+        // 此处为threshold赋值，取capacity*loadFactor和MAXIMUM_CAPACITY+1的最小值，capaticy一定不会超过MAXIMUM_CAPACITY，除非loadFactor大于1
+        threshold = (int) Math.min(capacity * loadFactor, MAXIMUM_CAPACITY + 1);
+        table = new Entry[capacity];
+        initHashSeedAsNeeded(capacity);
+    }
+```
+
+inflateTable 这个方法用于为主干数组table在内存中分配存储空间，通过.roundUpToPowerOf2(toSize) 可以确保 capacity 为大于或等于toSize的最接近toSize的二次幂，比如 toSize=13 , capacity=16; to_size=16,capacity=16; to_size=17,capacity=32.
+
+```java
+ private static int roundUpToPowerOf2(int number) {
+        // assert number >= 0 : "number must be non-negative";
+        return number >= MAXIMUM_CAPACITY
+                ? MAXIMUM_CAPACITY
+                : (number > 1) ? Integer.highestOneBit((number - 1) << 1) : 1;
+    }
+```
+
+roundUpToPowerOf2中的这段处理使得数组长度一定为2的次幂，Integer.highestOneBit是用来获取最左边的bit（其他bit位为0）所代表的数值.
+
+
+
+hash函数/哈希函数
+
+```java
+//这是一个神奇的函数，用了很多的异或，移位等运算，对key的hashcode进一步进行计算以及二进制位的调整等来保证最终获取的存储位置尽量分布均匀
+final int hash(Object k) {
+        int h = hashSeed;
+        if (0 != h && k instanceof String) {
+            return sun.misc.Hashing.stringHash32((String) k);
+        }
+
+        h ^= k.hashCode();
+        h ^= (h >>> 20) ^ (h >>> 12);
+        return h ^ (h >>> 7) ^ (h >>> 4);
+    }
+```
+
+以上hash函数计算出的值，通过indexFor进一步处理来获取实际的存储位置
+
+```java
+　　/**
+     * 返回数组下标
+     */
+    static int indexFor(int h, int length) {
+        return h & (length-1);
+    }
+```
+
+h &（length-1）保证获取的index一定在数组范围内，举个例子，默认容量16，length-1=15，h=18,转换成二进制计算为
+
+```java
+        1  0  0  1  0
+    &   0  1  1  1  1
+    __________________
+        0  0  0  1  0    = 2
+```
+
+最终计算出的index=2。有些版本的对于此处的计算会使用 取模运算，也能保证index一定在数组范围内，不过位运算对计算机来说，性能更高一些（HashMap中有大量位运算）
+
+所以最终存储位置的确定流程是这样的：
+
+![img](https://images2015.cnblogs.com/blog/1024555/201611/1024555-20161115133556388-1098209938.png)
+
+再来看看addEntry的实现：
+
+```java
+void addEntry(int hash, K key, V value, int bucketIndex) {
+        if ((size >= threshold) && (null != table[bucketIndex])) {
+            // 当size超过临界阈值threshold，并且即将发生哈希冲突时进行扩容
+            resize(2 * table.length);
+            hash = (null != key) ? hash(key) : 0;
+            bucketIndex = indexFor(hash, table.length);
+        }
+
+        createEntry(hash, key, value, bucketIndex);
+    }
+```
+
+通过以上代码能够得知，当发生哈希冲突并且size大于阈值的时候，需要进行数组扩容，扩容时，需要新建一个长度为之前数组2倍的新的数组，然后将当前的Entry数组中的元素全部传输过去，扩容后的新数组长度为之前的2倍，所以扩容相对来说是个耗资源的操作。
+
+
+
+**为何HashMap的数组长度一定是2的次幂？**
+
+我们来继续看上面提到的resize方法:
+
+```java
+ void resize(int newCapacity) {
+        Entry[] oldTable = table;
+        int oldCapacity = oldTable.length;
+        if (oldCapacity == MAXIMUM_CAPACITY) {
+            threshold = Integer.MAX_VALUE;
+            return;
+        }
+
+        Entry[] newTable = new Entry[newCapacity];
+        transfer(newTable, initHashSeedAsNeeded(newCapacity));
+        table = newTable;
+        threshold = (int)Math.min(newCapacity * loadFactor, MAXIMUM_CAPACITY + 1);
+    }
+```
+
+如果数组进行扩容，数组长度发生变化，而存储位置 index = h&(length-1),index也可能会发生变化，需要重新计算index，我们先来看看transfer这个方法.
+
+```java
+void transfer(Entry[] newTable, boolean rehash) {
+        int newCapacity = newTable.length;
+　　　　　// for循环中的代码，逐个遍历链表，重新计算索引位置，
+        // 将老数组数据复制到新数组中去（数组不存储实际数据，所以仅仅是拷贝引用而已）
+        for (Entry<K,V> e : table) {
+            while(null != e) {
+                Entry<K,V> next = e.next;
+                if (rehash) {
+                    e.hash = null == e.key ? 0 : hash(e.key);
+                }
+                int i = indexFor(e.hash, newCapacity);
+　　　　　　　　　 // 将当前entry的next链指向新的索引位置,newTable[i]有可能为空，
+                // 有可能也是个entry链，如果是entry链，直接在链表头部插入。
+                e.next = newTable[i];
+                newTable[i] = e;
+                e = next;
+            }
+        }
+    }
+```
+
+这个方法将老数组中的数据逐个链表地遍历，扔到新的扩容后的数组中，我们的数组索引位置的计算是通过 对key值的hashcode进行hash扰乱运算后，再通过和 length-1进行位运算得到最终数组索引位置。
+
+hashMap的数组长度一定保持2的次幂，比如16的二进制表示为 10000，那么length-1就是15，二进制为01111，同理扩容后的数组长度为32，二进制表示为100000，length-1为31，二进制表示为011111。从下图可以我们也能看到这样会保证低位全为1，而扩容后只有一位差异，也就是多出了最左位的1，这样在通过 h&(length-1)的时候，只要h对应的最左边的那一个差异位为0，就能保证得到的新的数组索引和老数组索引一致(大大减少了之前已经散列良好的老数组的数据位置重新调换)。
+
+![img](https://images2015.cnblogs.com/blog/1024555/201611/1024555-20161115215812138-679881037.png)
+
+ 还有，数组长度保持2的次幂，length-1的低位都为1，会使得获得的数组索引index更加均匀，比如：
+
+![img](https://images2015.cnblogs.com/blog/1024555/201611/1024555-20161116001404732-625340289.png)
+
+我们看到，上面的&运算，高位是不会对结果产生影响的（hash函数采用各种位运算可能也是为了使得低位更加散列），我们只关注低位bit，如果低位全部为1，那么对于 h 低位部分来说，任何一位的变化都会对结果产生影响，也就是说，要得到index=21这个存储位置，h的低位只有这一种组合。这也是数组长度设计为必须为2的次幂的原因。
+
+![img](https://images2015.cnblogs.com/blog/1024555/201611/1024555-20161116001717560-1455096254.png)
+
+如果不是2的次幂，也就是低位不是全为1此时，要使得index=21，h的低位部分不再具有唯一性了，哈希冲突的几率会变的更大，同时，index对应的这个bit位无论如何不会等于1了，而对应的那些数组位置也就被白白浪费了。
+
+get方法:
+
+```java
+ public V get(Object key) {
+　　　　 //如果key为null,则直接去table[0]处去检索即可。
+        if (key == null)
+            return getForNullKey();
+        Entry<K,V> entry = getEntry(key);
+        return null == entry ? null : entry.getValue();
+ }
+```
+
+get方法通过key值返回对应value，如果key为null，直接去table[0]处检索。我们再看一下getEntry这个方法
+
+```java
+final Entry<K,V> getEntry(Object key) {
+        if (size == 0) {
+            return null;
+        }
+        //通过key的hashcode值计算hash值
+        int hash = (key == null) ? 0 : hash(key);
+        //indexFor (hash&length-1) 获取最终数组索引，然后遍历链表，通过equals方法比对找出对应记录
+        for (Entry<K,V> e = table[indexFor(hash, table.length)];
+             e != null;
+             e = e.next) {
+            Object k;
+            if (e.hash == hash && 
+                ((k = e.key) == key || (key != null && key.equals(k))))
+                return e;
+        }
+        return null;
+    }    
+```
+
+可以看出，get方法的实现相对简单，key(hashcode)-->hash-->indexFor-->最终索引位置，找到对应位置table[i]，再查看是否有链表，遍历链表，通过key的equals方法比对查找对应的记录。要注意的是，有人觉得上面在定位到数组位置之后然后遍历链表的时候，e.hash == hash这个判断没必要，仅通过equals判断就可以。其实不然，试想一下，如果传入的key对象重写了equals方法却没有重写hashCode，而恰巧此对象定位到这个数组位置，如果仅仅用equals判断可能是相等的，但其hashCode和当前对象不一致，这种情况，根据Object的hashCode的约定，不能返回当前对象，而应该返回null，后面的例子会做出进一步解释。
+
+
+
+**重写 equals() 方法之后必须要重写 hashcode():**
+
+如果重写了equals而不重写hashcode会发生什么样的问题.
+
+```java
+/**
+ * Created by chengxiao on 2016/11/15.
+ */
+public class MyTest {
+    private static class Person{
+        int idCard;
+        String name;
+
+        public Person(int idCard, String name) {
+            this.idCard = idCard;
+            this.name = name;
+        }
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()){
+                return false;
+            }
+            Person person = (Person) o;
+            //两个对象是否等值，通过idCard来确定
+            return this.idCard == person.idCard;
+        }
+
+    }
+    public static void main(String []args){
+        HashMap<Person,String> map = new HashMap<Person, String>();
+        Person person = new Person(1234,"乔峰");
+        //put到hashmap中去
+        map.put(person,"天龙八部");
+        //get取出，从逻辑上讲应该能输出“天龙八部”
+        System.out.println("结果:"+map.get(new Person(1234,"萧峰")));
+    }
+}
+```
+
+实际输出结果：
+
+```
+结果：null
+```
+
+如果我们已经对HashMap的原理有了一定了解，这个结果就不难理解了。尽管我们在进行get和put操作的时候，使用的key从逻辑上讲是等值的（通过equals比较是相等的），但由于没有重写hashCode方法，所以put操作时，key(hashcode1)-->hash-->indexFor-->最终索引位置 ，而通过key取出value的时候 key(hashcode1)-->hash-->indexFor-->最终索引位置，由于hashcode1不等于hashcode2，导致没有定位到一个数组位置而返回逻辑上错误的值null（也有可能碰巧定位到一个数组位置，但是也会判断其entry的hash值是否相等，上面get方法中有提到。）
+
+所以，在重写equals的方法的时候，必须注意重写hashCode方法，同时还要保证通过equals判断相等的两个对象，调用hashCode方法要返回同样的整数值。而如果equals判断不相等的两个对象，其hashCode可以相同（只不过会发生哈希冲突，应尽量避免)。
+
+
 
 
 
@@ -3517,7 +3903,7 @@ jvm里的垃圾就是对象，指无用的对象，在真正执行垃圾回收�
 由于程序计数器中存储的数据所占空间的大小不会随程序的执行发生改变，因此，程序计数器是不会发生内存溢出（OutOfMemory）现象的。
 
 **2、虚拟机栈**
-虚拟机栈也就是我们所说的栈内存，是java方法执行的内存模型。每个方法在执行的时候都会创建一个栈帧，用于存储局部变量表、操作数栈、动态链接、和方法返回地址等信息。
+虚拟机栈也就是我们所说的栈内存，是**java方法执行的内存模型**。每个方法在执行的时候都会创建一个栈帧，用于存储局部变量表、操作数栈、动态链接、和方法返回地址等信息。
 
 局部变量表存储的是基本数据类型、returnAdress类型和对象引用。局部变量表的大小在编译期间完成分配，因此程序执行期间局部变量表的大小不会改变。
 
@@ -3528,13 +3914,26 @@ jvm里的垃圾就是对象，指无用的对象，在真正执行垃圾回收�
 **3、本地方法栈：**
 本地方法栈和虚拟机栈类似，只不过本地方法栈为虚拟机使用本地方法（native）服务。
 
+
+
+**所有线程共享的内存区域**
+
 **4、堆**
-java堆是所有线程共享的一块内存，在虚拟机启动是创建，几乎所有的对象实例都在这里创建，因此该区域经常发生垃圾回收。从内存回收的角度看，由于现在收集器基本都是采用分代收集算法，所以java堆中还可以细分为：新生代和老年代；新生代又分为Eden空间、From Survivor空间、To Survivor空间三部分。
+
+java 堆是JVM内存区域中最大的一块，它被所有线程所公用。它随着JVM的启用而创建，**它主要是用来存放java程序中所产生的对象实例**。在java中我们不需要手动的去分配和释放内存。内存的分配是由程序完成的，我们通过关键字new 为每个对象申请内存空间 (基本类型除外)，所有的对象都在堆 (Heap)中分配空间。而释放内存是通过GC(垃圾收集器)管理释放的。堆还可以细分为**新生代和老年代**，**新生代再细致一点还可以分为Eden区、From Survivior区、To Survivor区。** 如果堆内存不足就可能导致堆内存溢出 java.lang.OutOfMemoryError
+
+java堆是所有线程共享的一块内存，在虚拟机启动时创建，几乎所有的对象实例都在这里创建，因此该区域经常发生垃圾回收。从内存回收的角度看，由于现在收集器基本都是采用分代收集算法，所以java堆中还可以细分为：新生代和老年代；新生代又分为Eden空间、From Survivor空间、To Survivor空间三部分。
 
 **5、方法区**
+
+方法区**用于存储虚拟机加载的类信息、常量、静态变量（JDK7中被移到Java堆),即时编译期编译后的代码（类方法）等数据**等数据，虚拟机规范是把这块区域描述为堆的一个逻辑部分的，但实际它应该是要和堆区分开的。这里需要说一下**运行时常量池**，**它是方法区的一部分，用于存放编译期生成的各种字面量和符号引用（其实就是八大基本类型的包装类型和String类型数据（JDK7中被移到Java堆））**
+jdk7已经把原本放在方法区的**字符串常量池**（注意名字是字符串常量池不是运行时常量池）移出。
+
 方法区和java堆一样，是各个线程共享的内存区域，不需要连续的内存，并且可以动态扩展，动态扩展失败一样会抛出OutOfMemoryError异常。方法区用于存放已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。虽然Java虚拟机规范把方法区描述为堆的一个逻辑部分，但是为了与java堆区分开，方法区又叫非堆（Non-Heap）,很多人更愿意把方法区称为“永久代”。从jdk1.7已经开始准备“去永久代”的规划，jdk1.7的HotSpot中，已经把原来放在方法区中的静态变量，字符串常量池等移到堆内存中。在jdk1.8中，永久代已经不存在，存储的类信息、即时编译器编译后的代码等已经移动到元空间（MetaSpace）中，元空间并没有处于堆内存上，而是直接占用本地内存（NativeMemory）。
 
 运行时常量池属于方法区的一部分，常量池中存放2类常量：字面量和符号引用。字面量比较接近java语言层面的常量概念，如文本字符串，被声明为final的常量值等。而符号引用则属于编译原理方面的概念，包括3类常量：类和接口的全限定名、字段的名称和描述符，方法的名称和描述符。
+
+![这里写图片描述](https://img-blog.csdn.net/20180504164639666?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2h1YmluOTE2/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
 
 
 
