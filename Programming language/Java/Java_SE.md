@@ -2150,24 +2150,30 @@ void addEntry(int hash, K key, V value, int bucketIndex) {
 
 ```java
 void transfer(Entry[] newTable, boolean rehash) {
-        int newCapacity = newTable.length;
-　　　　　// for循环中的代码，逐个遍历链表，重新计算索引位置，
-        // 将老数组数据复制到新数组中去（数组不存储实际数据，所以仅仅是拷贝引用而已）
-        for (Entry<K,V> e : table) {
-            while(null != e) {
-                Entry<K,V> next = e.next;
-                if (rehash) {
-                    e.hash = null == e.key ? 0 : hash(e.key);
-                }
-                int i = indexFor(e.hash, newCapacity);
-　　　　　　　　　 // 将当前entry的next链指向新的索引位置,newTable[i]有可能为空，
-                // 有可能也是个entry链，如果是entry链，直接在链表头部插入。
-                e.next = newTable[i];
-                newTable[i] = e;
-                e = next;
+    int newCapacity = newTable.length;
+    // for循环中的代码，逐一遍历链表，重新计算索引位置
+    // 将老数组数据复制到新数组中去，数组中不存储实际数据，所以隐隐是拷贝引用而已
+    for (Entry<K,V> e: table){
+        while (null != e){
+            Entry<K,V> next = e.next;
+            if (rehash){
+                // 如果需要重新哈希
+                // 数组中的 entry 的属性hash
+                // 当 e 的 key 为 null 的时候设置为0
+                // 当 e 的 key 不是 null 的时候设置为 重新计算哈希的值
+                e.hash = null == e.key ? 0 : hash(e.key);
             }
+            int i = indexFor(e.hash, newCapacity);
+            // 将当前 entry 的 next 链指向新的索引的位置，newTable[i]
+            // 有可能为空。
+            // 有可能也是个 entry 链， 如果是 entry 连，之间在链表头部插入
+            e.next = newTable[i]
+            newTable[i] = e;
+            // 处理链表的下一个 entry 
+            e = next;
         }
     }
+}
 ```
 
 这个方法将老数组中的数据逐个链表地遍历，扔到新的扩容后的数组中，我们的数组索引位置的计算是通过 对key值的hashcode进行hash扰乱运算后，再通过和 length-1进行位运算得到最终数组索引位置。
@@ -2272,7 +2278,7 @@ public class MyTest {
 结果：null
 ```
 
-如果我们已经对HashMap的原理有了一定了解，这个结果就不难理解了。尽管我们在进行get和put操作的时候，使用的key从逻辑上讲是等值的（通过equals比较是相等的），但由于没有重写hashCode方法，所以put操作时，key(hashcode1)-->hash-->indexFor-->最终索引位置 ，而通过key取出value的时候 key(hashcode1)-->hash-->indexFor-->最终索引位置，由于hashcode1不等于hashcode2，导致没有定位到一个数组位置而返回逻辑上错误的值null（也有可能碰巧定位到一个数组位置，但是也会判断其entry的hash值是否相等，上面get方法中有提到。）
+如果我们已经对HashMap的原理有了一定了解，这个结果就不难理解了。尽管我们在进行get和put操作的时候，使用的key从逻辑上讲是等值的（通过equals比较是相等的），但由于没有重写hashCode方法，所以put操作时，key(hashcode1)-->hash-->indexFor-->最终索引位置 ，而通过key取出value的时候 key(hashcode2)-->hash-->indexFor-->最终索引位置，由于hashcode1不等于hashcode2，导致没有定位到一个数组位置而返回逻辑上错误的值null（也有可能碰巧定位到一个数组位置，但是也会判断其entry的hash值是否相等，上面get方法中有提到。）
 
 所以，在重写equals的方法的时候，必须注意重写hashCode方法，同时还要保证通过equals判断相等的两个对象，调用hashCode方法要返回同样的整数值。而如果equals判断不相等的两个对象，其hashCode可以相同（只不过会发生哈希冲突，应尽量避免)。
 
@@ -2295,8 +2301,6 @@ Hashcode予hashcode自己向右位移16位的异或运算。这样可以确保�
 **Hash冲突**
 
 不同的对象算出来的数组下标是相同的这样就会产生hash冲突。
-
-![Java_hashmap_原理2](/Users/linianzu/Documents/learning_MD_notes/Picture/Java_hashmap_原理2.png)
 
 Hash冲突会产生单线链表。当单线链表达到一定长度后效率会非常低，那么在jdk1.8以后的话，加入了红黑树，也就是说单线列表达到一定长度后就会变成一个红黑树。
 
