@@ -2,6 +2,55 @@
 
 
 
+## /目录 、/home目录 、~目录的区别
+
+**/ ：根目录**
+
+cd / : 从任何用户执行该命令都会进入同一个目录，即所有用户共享。
+
+
+
+**/home ：家目录（我觉得还不如叫用户列表目录）**
+
+cd /home ：会显示这台机器的用户
+
+
+
+**~ ：当前用户的家目录**
+
+在imooc用户下登录：
+
+cd ~ 等价于 cd /home/imooc ：会进入当前用户的家目录（一般情况连接上机器都是在这个目录，一般操作也都是在这里）
+
+## tar 命令
+
+[root@localhost ~]#tar [选项] [-f 压缩包名] 源文件或目录
+
+选项：
+
+- -c：打包；
+- -f：指定压缩包的文件名。压缩包的扩展名是用来给管理员识别格式的，所以一定要正确指定扩展名；
+- -v：显示打包文件过程；
+
+example：
+
+```
+[root@localhost ~]# tar -cvf anaconda-ks.cfg.tar anaconda-ks.cfg
+#把anacondehks.cfg打包为 anacondehks.cfg.tar文件
+```
+
+
+
+解压缩：
+
+```
+tar -xvf anaconda-ks.cfg. tar
+```
+
+
+
+
+
 ## Linux 常用操作命令大全
 
 #### Linux系统的文件结构

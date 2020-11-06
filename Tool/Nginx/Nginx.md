@@ -138,6 +138,32 @@ location[ = | ~ | ~* | ^~] url{
 
 ## 反向代理实战
 
+目标：
+
+Tomcat绑定的是 localhost 的 8080 端口。我们希望当我们访问本机的 80 端口的时候，也会自动跳转到 8080 端口。
+
+首先我们需要打开 tomcat 服务。这个时候我们就能从 8080 端口访问到 tomcat 的页面。
+
+然后我们再打开 Ningx 的配置 config 文件：
+
+```
+ server {
+        listen       80; #监听的端口
+        server_name  localhost;
+
+        #charset koi8-r;
+
+        #access_log  logs/host.access.log  main;
+
+        location / {
+            root   html;
+            proxy_pass http://127.0.0.1:8080; #要被代理到的地方
+            index  index.html index.htm;
+        }
+```
+
+
+
 ## 负载均衡实战
 
 ## 动静分离实战
@@ -147,3 +173,58 @@ location[ = | ~ | ~* | ^~] url{
 ## mac下nginx的安装和配置
 
 https://www.jianshu.com/p/026d67cc6cb1
+
+
+
+## nginx文件目录
+
+**5.1 nginx安装文件目录**
+/usr/local/Cellar/nginx
+**5.2 nginx配置文件目录**
+/usr/local/etc/nginx
+**5.3 config文件目录**
+/usr/local/etc/nginx/nginx.conf
+**5.4 系统hosts位置**
+/private/etc/hosts
+
+
+
+## nginx常用命令
+
+```
+nginx  #启动nginx
+nginx -s quit  #快速停止nginx
+nginx -V #查看版本，以及配置文件地址
+nginx -v #查看版本
+nginx -s reload|reopen|stop|quit   #重新加载配置|重启|快速停止|安全关闭nginx
+nginx -h #帮助
+```
+
+```
+$ nginx -h #帮助
+nginx version: nginx/1.10.1
+Usage: nginx [-?hvVtTq] [-s signal] [-c filename] [-p prefix] [-g directives]
+
+Options:
+  -?,-h         : this help
+  -v            : show version and exit
+  -V            : show version and configure options then exit
+  -t            : test configuration and exit
+  -T            : test configuration, dump it and exit
+  -q            : suppress non-error messages during configuration testing
+  -s signal     : send signal to a master process: stop, quit, reopen, reload
+  -p prefix     : set prefix path (default: /usr/local/Cellar/nginx/1.10.1/)
+  -c filename   : set configuration file (default: /usr/local/etc/nginx/nginx.conf)
+  -g directives : set global directives out of configuration file
+```
+
+
+
+## 卸载：
+
+```
+brew uninstall nginx
+```
+
+
+
