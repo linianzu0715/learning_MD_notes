@@ -4723,22 +4723,64 @@ class Solution(object):
 给定一个字符串 **S** 和一个字符串 **T**，计算在 **S** 的子序列中 **T** 出现的个数。一个字符串的一个子序列是指，通过删除一些（也可以不删除）字符且不干扰剩余字符相对位置所组成的新字符串。（例如，"ACE" 是 "ABCDE" 的一个子序列，而 "AEC" 不是）
 
 ```
-输入：S = "rabbbit", T = "rabbit"
+输入：s = "rabbbit", t = "rabbit"
 输出：3
+解释：
+如下图所示, 有 3 种可以从 s 中得到 "rabbit" 的方案。
+(上箭头符号 ^ 表示选取的字母)
+rabbbit
+^^^^ ^^
+rabbbit
+^^ ^^^^
+rabbbit
+^^^ ^^^
 ```
+
+```
+输入：s = "babgbag", t = "bag"
+输出：5
+解释：
+如下图所示, 有 5 种可以从 s 中得到 "bag" 的方案。 
+(上箭头符号 ^ 表示选取的字母)
+babgbag
+^^ ^
+babgbag
+^^    ^
+babgbag
+^    ^^
+babgbag
+  ^  ^^
+babgbag
+    ^^^
+```
+
+
 
 ```python
 class Solution:
     def numDistinct(self, s: str, t: str) -> int:
+        # n1 为s字符串的长度
+        # n2 为t字符串的长度
         n1 = len(s)
         n2 = len(t)
+        # 声明DP数组，行列数目为 n1+1 和 n2+1 所有的位置上面的初始数字都是0
         dp = [[0] * (n1 + 1) for _ in range(n2 + 1)]
+
+        # 将第一行的都设置为1
         for j in range(n1 + 1):
             dp[0][j] = 1
+
+        """
+        介绍一个矩阵的每个位置上的含义
+        dp[2,3] = 表示字符串S[0:3]的子串为t[0:2]有几种方式
+        """
+        # 从第二行开始
         for i in range(1, n2 + 1):
+            # 从每一行的一号位置上开始
             for j in range(1, n1 + 1):
+                # 判断递归函数
                 if t[i - 1] == s[j - 1]:
-                    dp[i][j] = dp[i - 1][j - 1]  + dp[i][j - 1]
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i][j - 1]
                 else:
                     dp[i][j] = dp[i][j - 1]
 
@@ -4749,6 +4791,22 @@ class Solution:
 
 ### [118. 杨辉三角](https://leetcode-cn.com/problems/pascals-triangle/)
 
+给定一个非负整数 *numRows，*生成杨辉三角的前 *numRows* 行。
+
+```
+输入: 5
+输出:
+[
+     [1],
+    [1,1],
+   [1,2,1],
+  [1,3,3,1],
+ [1,4,6,4,1]
+]
+```
+
+
+
 ```python
 class Solution(object):
     def generate(self, numRows):
@@ -4756,6 +4814,7 @@ class Solution(object):
         :type numRows: int
         :rtype: List[List[int]]
         """
+        # 咱先把前几行生成了
         if numRows == 0:
             return []
         if numRows == 1:
@@ -4764,17 +4823,19 @@ class Solution(object):
             return [[1],[1,1]]
         if numRows == 3:
             return [[1],[1,1],[1,2,1]]
+        
+        # 前三行的状态
         now = [[1],[1,1],[1,2,1]]
         for i in range(3,numRows):
+            # 左右两边的数字肯定是1
+            # 然后计算出中间的数组
             temp = []
             for j in range(i+1):
                 if j == 0 or j == i:
                     temp.append(1)
                 else:
                     temp.append(now[i-1][j-1]+now[i-1][j])
-            print(temp)
             now.append(temp)
-            
         return now
 ```
 
@@ -4788,6 +4849,8 @@ class Solution(object):
 class Solution(object):
     def getRow(self, rowIndex):
         """
+        方式方法和115 是一样的 就是输出的内容不一样 115是把整个三角形都输出出来
+        118 只输出目的的一行
         :type rowIndex: int
         :rtype: List[int]
         """
@@ -4805,7 +4868,6 @@ class Solution(object):
                     temp.append(1)
                 else:
                     temp.append(now[i-1][j-1]+now[i-1][j])
-            print(temp)
             now.append(temp)
         return now[rowIndex]
 ```
@@ -4816,10 +4878,30 @@ class Solution(object):
 
 给定一个三角形，找出自顶向下的最小路径和。每一步只能移动到下一行中相邻的结点上。相邻的结点 在这里指的是 下标 与 上一层结点下标 相同或者等于 上一层结点下标 + 1 的两个结点。
 
+```
+[
+     [2],
+    [3,4],
+   [6,5,7],
+  [4,1,8,3]
+]
+
+自顶向下的最小路径和为 11（即，2 + 3 + 5 + 1 = 11）。
+```
+
+
+
 ```python
 import numpy as np
 class Solution(object):
     def minimumTotal(self, triangle):
+        """
+        主要的思路是，在三角形的每一行的每一个位置上
+        计算出到这个位置为止，最短的路径需要走多少步
+        最后得到最后一行的最小值
+        :param triangle:
+        :return:
+        """
         length = len(triangle)
         temp = np.zeros((length,length),dtype = int)
         for i in range(length):
@@ -4841,10 +4923,22 @@ class Solution(object):
 
 给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。如果你最多只允许完成一笔交易（即买入和卖出一支股票一次），设计一个算法来计算你所能获取的最大利润。
 
+```
+输入: [7,1,5,3,6,4]
+输出: 5
+解释: 在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5 。
+     注意利润不能是 7-1 = 6, 因为卖出价格需要大于买入价格；同时，你不能在买入前卖出股票。
+```
+
+
+
 ```python
 class Solution(object):
     def maxProfit(self, prices):
         """
+        主要的过程是从前往后遍历数组
+        然后在遍历的过程中，用一个变量记录之前的最小的数字
+        然后计算出到当前位置卖出能获得的利润
         :type prices: List[int]
         :rtype: int
         """ 
@@ -4865,10 +4959,35 @@ class Solution(object):
 
 给定一个数组，它的第 *i* 个元素是一支给定股票第 *i* 天的价格。设计一个算法来计算你所能获取的最大利润。你可以尽可能地完成更多的交易（多次买卖一支股票）。
 
+```
+输入: [7,1,5,3,6,4]
+输出: 7
+解释: 在第 2 天（股票价格 = 1）的时候买入，在第 3 天（股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。
+     随后，在第 4 天（股票价格 = 3）的时候买入，在第 5 天（股票价格 = 6）的时候卖出, 这笔交易所能获得利润 = 6-3 = 3 。
+
+```
+
+```
+输入: [1,2,3,4,5]
+输出: 4
+解释: 在第 1 天（股票价格 = 1）的时候买入，在第 5 天 （股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。
+     注意你不能在第 1 天和第 2 天接连购买股票，之后再将它们卖出。
+     因为这样属于同时参与了多笔交易，你必须在再次购买前出售掉之前的股票。
+```
+
+
+
 ```python
 class Solution(object):
     def maxProfit(self, prices):
         """
+        122 和 121 的区别在于 122 允许进行多次交易
+        我们还是采取从前往后遍历数组的方式
+        并且也是记录一个到目前为止最低价格
+        当我们遇到价格下降的时候，就进行一次交易，并且把最低价格更新为当前价格
+        如果刚开始一直在下降，就只用更新价格
+        如果价格在上升，就往后走
+        最后记录交易的总收入
         :type prices: List[int]
         :rtype: int
         """
@@ -4939,12 +5058,6 @@ class Solution(object):
 
 ```python
 """
-第一种 暴力解法
-时间复杂度：O(n*2)
-算法描述：对于每一个数组中的数字，都往后找，直到找不到为止，然后记录最大的长度。
-"""
-
-"""
 第二种 哈希表
 时间复杂度：O(n)
 算法描述：
@@ -4982,9 +5095,30 @@ class Solution(object):
 
 给定一个二维的矩阵，包含 `'X'` 和 `'O'`（**字母 O**）。找到所有被 `'X'` 围绕的区域，并将这些区域里所有的 `'O'` 用 `'X'` 填充。
 
+```
+X X X X
+X O O X
+X X O X
+X O X X
+-->
+X X X X
+X X X X
+X X X X
+X O X X
+```
+
+
+
 ```python
 class Solution(object):
-    def solve(self, board):
+  	def solve(self, board):
+        """
+        我们矩阵中有三种元素：X，被X包围的O，没有被X包围的O
+        由于边界上的O不会被填充为X。因此，我们只需要将所有的边界
+        上的O以及和边界上的O相邻的O都标记上，然后将其余的O都替换为X就可以
+        :type board: List[List[str]]
+        :rtype: None Do not return anything, modify board in-place instead.
+        """
         if not any(board):
             return
 
