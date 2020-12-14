@@ -393,430 +393,6 @@ class Solution(object):
 
 
 
-## 数学
-
-### [202. 快乐数](https://leetcode-cn.com/problems/happy-number/)
-
-编写一个算法来判断一个数 n 是不是快乐数。「快乐数」定义为：对于一个正整数，每一次将该数替换为它每个位置上的数字的平方和，然后重复这个过程直到这个数变为 1，也可能是 无限循环 但始终变不到 1。如果 可以变为  1，那么这个数就是快乐数。
-
-```python
-class Solution(object):
-    """
-    创建set。每次的平方之后之后计算结果，如果出现了1则结束
-    如果有重复则中断
-    """
-    def isHappy(self, n):
-        """
-        :type n: int
-        :rtype: bool
-        """
-        Dict = set()
-        while n != 1:
-            Dict.add(n)
-            Sum = sum([int(x) * int(x) for x in list(str(n))])
-            if Sum == 1:
-                return True
-            elif Sum in Dict:
-                return False
-            else:
-                n = Sum
-        return True
-```
-
-
-
-### [204. 计数质数](https://leetcode-cn.com/problems/count-primes/)
-
-统计所有小于非负整数 *n* 的质数的数量。
-
-```python
-class Solution(object):
-    def countPrimes(self, n):
-        """
-        厄拉多塞筛法
-        :param n:
-        :return:
-        """
-
-        # 0，1，都不是质数
-        if n < 3:
-            return 0
-
-        # 2是一个质数
-        if n == 3:
-            return 1
-
-        res = 0
-
-        # 构建布尔数组，记录这个位置上的数字是不是质数
-        # 并且初始的时候设置所有的位置上都是True
-        not_prime = [True] * n
-        not_prime[0] = not_prime[1] = False
-        not_prime[2] = True
-
-        # 只用循环的到 n 开根号 + 1
-        for i in range(2, int(n ** 0.5)+1):
-            # 如果当前这个位置上的是质数
-            if not_prime[i]:
-                # 就把所有它的倍数设置为合数
-                for j in range(i*i, n, i):
-                    not_prime[j] = False
-                    
-        # 返回范围内所有的质数的数目
-        return sum(not_prime)
-```
-
-
-
-### [263. 丑数](https://leetcode-cn.com/problems/ugly-number/)
-
-编写一个程序判断给定的数是否为丑数。丑数就是只包含质因数 `2, 3, 5` 的**正整数**。
-
-```python
-"""
-将输入的数字中所有的2，3，5的因数都除去，最后如果结果为1
-则说明是丑数。如果结果不是1，则不是丑数。
-"""
-
-class Solution(object):
-    def isUgly(self, num):
-        if num <=0:
-            return False
-        while (num % 2) == 0:
-            num = num/2
-        while (num % 3) == 0:
-            num = num/3
-        while (num % 5) == 0:
-            num = num/5
-        return num == 1
-```
-
-
-
-### [264. 丑数 II](https://leetcode-cn.com/problems/ugly-number-ii/)
-
-编写一个程序，找出第 `n` 个丑数。丑数就是质因数只包含 `2, 3, 5` 的**正整数**。
-
-```python
-class Solution(object):
-    def nthUglyNumber(self, n):
-        # 创建一个队列
-        # 但是过程中需要保证heap是排序好的
-        heap = [1]
-        # 创建一个记录访问过的数字的hashset
-        visited = set([1])
-        
-        # 初始化当前的值为None
-        val = None
-        # 循环n次，找到第n个结果
-        for i in range(n):
-            # 从队列中获取第一个
-            val = heapq.heappop(heap)
-            # 相继乘上2，3，5的因数
-            # 如果结果在visited中出现过，就跳过，
-            # 如果没有出现过，则就加入到队列尾端，并且加入到visited集合中
-            for factor in [2, 3, 5]:
-                if val * factor not in visited:
-                    visited.add(val * factor)
-                    heapq.heappush(heap, val * factor)
-        return val
-```
-
-
-
-### [1201. 丑数 III](https://leetcode-cn.com/problems/ugly-number-iii/)
-
-请你帮忙设计一个程序，用来找出第 `n` 个丑数。丑数是可以被 `a` **或** `b` **或** `c` 整除的 **正整数**。
-
-```
-让我们观察题目，可以看到，最终状态(即n)的范围非常大。试图自底向上递推或是按照通常的自顶向下回溯显然会超时(比如动态规划、DFS等方法)
-
-面对这么大的状态空间，二分法的时间复杂度是logN,因此能够大大压缩需要遍历的状态数目
-
-按照题意，所谓丑数是可以至少被a、b、c三者中的一者整除的，那么对于一个丑数X，我们能够确定它是第几个丑数吗？
-
---答案显然是可以的，我们只需要计算X中包含了多少个丑数因子即可。
-
-即只需要知道在[0,X]范围内,还有多少个丑数即可，而这些丑数，无非就是一些能被a或者b或者c所整除的数。
-
-那么显然，我们直接用X/a、X/b、X/c就能计算出[0,X]范围内有多少数能被a或者b或者c整除，然后把它们加起来就是答案！
-
-但是仔细思考一下，我们是不是重复计算了些什么？如果一个数既能被a整除，又能被b整除，那么实际上该数在先前的计算中就被重复计算了一次(分别是在计算X/a和X/b时)。
-
---好吧，让我们思考所有可能的情况
-
-1.该数只能被a整除 (该数一定是a 的整数倍)
-
-2.该数只能被b整除 (该数一定是b 的整数倍)
-
-3.该数只能被c整除 (该数一定是c 的整数倍)
-
-4.该数只能被a和b同时整除 (该数一定是a、b最小公倍数的整数倍)
-
-5.该数只能被a和c同时整除 (该数一定是a、c最小公倍数的整数倍)
-
-6.该数只能被b和c同时整除 (该数一定是b、c最小公倍数的整数倍)
-
-7.该数只能被a和b和c同时整除（该数一定是a、b、c的最小公倍数的整数倍）
-
-所以，我们只需要分别计算以上七项就能得到结果了！让我们分别来看（用MCM+下标表示最小公倍数）:
-
-情况1 = X/a - 情况4 - 情况5 - 情况7
-情况2 = X/b - 情况4 - 情况6 - 情况7
-情况3 = X/c - 情况5 - 情况6 - 情况7
-情况4 = X/MCM_a_b - 情况7
-情况5 = X/MCM_a_c - 情况7
-情况6 = X/MCM_b_c - 情况7
-情况7 = X/MCM_a_b_c
-
-让我们整理上述方程后也就得到：
-
-sum(情况) = X/a + X/b + X/c - X/MCM_a_b - X/MCM_a_c - X/MCM_b_c + X/MCM_a_b_c
-
-好了，现在也就得到了计算X中包含多少个丑数因子的方法了！
-```
-
-
-
-```
-输入：n = 3, a = 2, b = 3, c = 5
-输出：4
-解释：丑数序列为 2, 3, 4, 5, 6, 8, 9, 10... 其中第 3 个是 4。
-```
-
-
-
-```python
-class Solution(object):
-    """
-    找到两个数的最大公因数
-    """
-    def gcd(self, x, y): 
-        while(y): 
-            x, y = y, x % y
-        return x 
-  
-    def nthUglyNumber(self, n, a, b, c):
-        """
-        :type n: int
-        :type a: int
-        :type b: int
-        :type c: int
-        :rtype: int
-        """
-        
-        """
-        三个整数的最小公倍数
-        """
-        def Lcm3(x,y,z):
-            a = (x*y)//self.gcd(x,y)  
-            return (a*z)//self.gcd(a,z)
-        
-        """ 计算到这个位置为止，前面有多少个丑数
-        """
-        def uglynum(x):
-                return x//a+x//b+x//c-x//(a*b//self.gcd(a,b))-x//(a*c//self.gcd(a,c))-x//(b*c//self.gcd(b,c))+x//Lcm3(a,b,c)
-            
-        # 确定要进行二分查找的范围 右边界要保证至少有n个丑数在范围之内
-        left=1
-        right=n*min(a,b,c)
-        
-        # 二分查找
-        while left<right:
-            mid=(left+right)//2
-            if uglynum(mid)<n:
-                left=mid+1
-            else:
-                right=mid
-        return left
-```
-
-
-
-
-
-### [274. H 指数](https://leetcode-cn.com/problems/h-index/)
-
-给定一位研究者论文被引用次数的数组（被引用次数是非负整数）。编写一个方法，计算出研究者的 h 指数。h 指数的定义：h 代表“高引用次数”（high citations），一名科研人员的 h 指数是指他（她）的 （N 篇论文中）总共有 h 篇论文分别被引用了至少 h 次。（其余的 N - h 篇论文每篇被引用次数 不超过 h 次。）例如：某人的 h 指数是 20，这表示他已发表的论文中，每篇被引用了至少 20 次的论文总共有 20 篇。
-
-```python
-class Solution(object):
-    # 输入的是一个数组citations
-    def hIndex(self, citations):
-        result = 0
-        # 最终的结果最多就是n，n是citation的长度
-        # 出现的场景是为数组中所有的数都是相等的
-        for i in range(1,len(citations)+1):
-            nums = 0
-            # 循环citation中的所有的位置
-            for j in range(len(citations)):
-                # 如果当前位置的值大于i，计数器+1
-                if citations[j] >= i:
-                    nums += 1
-            # 当循环完所有的位置之后，计数器的数字比i小，则返回上一个数字
-            if nums < i:
-                return i-1
-            # 如果是最后一个数字，并且计数器的数字也更大，返回最后的数字
-            if i == len(citations) and nums >= i:
-                return i
-        # 当第一都不满足的时候，返回0
-        return result
-```
-
-
-
-### [279. 完全平方数](https://leetcode-cn.com/problems/perfect-squares/)
-
-给定正整数 *n*，找到若干个完全平方数（比如 `1, 4, 9, 16, ...`）使得它们的和等于 *n*。你需要让组成和的完全平方数的个数最少。
-
-```python
-import math
-class Solution(object):
-    def numSquares(self, n):
-        # 去除之中4的因数
-        while (n % 4 == 0):
-            n = n / 4
-        # 如果除8余数为7，则可以用4个来组合成
-        if (n % 8 == 7):
-            return 4
-        # 否则，就一定能用两个最多三个完全平方数来组成长这个数字
-        a = 0
-        # 找能否用两个数字来组成
-        while (a**2 < n):
-            b = int(math.sqrt(n - (a**2)))
-            if (b**2 + a**2) == n:
-                return int(a > 0) + int(b > 0)
-            a = a+1
-        # 否则一定能用三个来组成
-        return 3
-```
-
-
-
-### [313. 超级丑数](https://leetcode-cn.com/problems/super-ugly-number/)
-
-编写一段程序来查找第 `*n*` 个超级丑数。超级丑数是指其所有质因数都是长度为 `k` 的质数列表 `primes` 中的正整数。
-
-```
-输入: n = 12, primes = [2,7,13,19]
-输出: 32 
-解释: 给定长度为 4 的质数列表 primes = [2,7,13,19]，前 12 个超级丑数序列为：[1,2,4,7,8,13,14,16,19,26,28,32] 。
-```
-
-
-
-```python
-class Solution(object):
-    def nthSuperUglyNumber(self, n, primes):
-        # 用来存储当前的候选的superNum
-        candidates = [1]*len(primes)
-        # 用来存储这个位置上的candidates的数字上一个是从什么superNums得来的
-        ids = [0]*len(primes)
-        # 用来存储已经得到的超级丑数
-        superNums = [1]
-        nextMin = 1
-        for count in range(1, n) :
-            for i in range(len(primes)):
-                # 找到了下一个进行相乘的数字
-                if nextMin == candidates[i] :
-                    candidates[i] = superNums[ids[i]]*primes[i]
-                    ids[i] += 1
-            # 找到最小值
-            nextMin = min(candidates)
-            # 得到这一轮的superNum
-            superNums.append(nextMin)
-        return superNums[-1]
-```
-
-
-
-### [343. 整数拆分](https://leetcode-cn.com/problems/integer-break/)
-
-给定一个正整数 *n*，将其拆分为**至少**两个正整数的和，并使这些整数的乘积最大化。 返回你可以获得的最大乘积。
-
-```python
-class Solution:
-    # 拆出来的3的因数越多越好
-    def integerBreak(self, n: int) -> int:
-        # 当n为3，乘积最大为2
-        # 当n为2，乘积最大为1
-        if n <= 3: return n - 1
-        # 找到这个数中最多有多少个3
-        a, b = n // 3, n % 3
-        # 如果余数为0，则就是所有的3相乘的结果
-        if b == 0: return int(math.pow(3, a))
-        # 如果余数是1
-        if b == 1: return int(math.pow(3, a - 1) * 4)
-        # 如果余数是2
-        return int(math.pow(3, a) * 2)
-```
-
-
-
-### [367. 有效的完全平方数](https://leetcode-cn.com/problems/valid-perfect-square/)
-
-给定一个正整数 *num*，编写一个函数，如果 *num* 是一个完全平方数，则返回 True，否则返回 False。
-
-```python
-class Solution(object):
-    def isPerfectSquare(self, num):
-        """
-        :type num: int
-        :rtype: bool
-        """
-        left = 0 
-        right = num
-        
-        # 使用二分查找的方法，找到两个最靠近开方值的数字
-        while left +1 < right:
-            now = (left + right)/2
-            if now**2 > num:
-                right = now
-            if now**2 < num:
-                left = now
-            if now**2 == num:
-                return True
-        # 找到之后进行检验
-        if left**2 == num or right**2 == num:
-            return True
-        return False
-```
-
-
-
-### [372. 超级次方](https://leetcode-cn.com/problems/super-pow/)
-
-你的任务是计算 *a**b* 对 1337 取模，*a* 是一个正整数，*b* 是一个非常大的正整数且会以数组形式给出。
-
-```
-输入: a = 2, b = [1,0]
-输出: 1024
-```
-
-```
-输入: a = 2, b = [3]
-输出: 8
-```
-
-```python
-class Solution(object):
-    def superPow(self, a, b):
-        # 特殊情况
-        if a == 0:
-            return 0
-        # 存储结果的变量
-        ans = 1
-        # 对1337取模的方法
-        def mod(x):
-            return x % 1337
-        # 每一位置，从后往前开始计算次方
-        for num in b:
-            ans = mod(mod(ans ** 10) * mod(a ** num))
-        return ans
-```
-
-
-
 
 ## 字符串
 
@@ -2056,7 +1632,18 @@ class Solution(object):
 
 ### [37. 解数独](https://leetcode-cn.com/problems/sudoku-solver/)
 
-编写一个程序，通过已填充的空格来解决数独问题。
+编写一个程序，通过已填充的空格来解决数独问题。一个数独的解法需遵循如下规则：
+
+数字 1-9 在每一行只能出现一次。
+数字 1-9 在每一列只能出现一次。
+数字 1-9 在每一个以粗实线分隔的 3x3 宫内只能出现一次。
+空白格用 '.' 表示。
+
+**提示：**
+
+- 给定的数独序列只包含数字 `1-9` 和字符 `'.'` 。
+- 你可以假设给定的数独只有唯一解。
+- 给定数独永远是 `9x9` 形式的。
 
 ```python
 from collections import defaultdict
@@ -2156,6 +1743,11 @@ class Solution:
 
 
 ### [38. 外观数列](https://leetcode-cn.com/problems/count-and-say/)
+
+给定一个正整数 `n` ，输出外观数列的第 `n` 项。「外观数列」是一个整数序列，从数字 1 开始，序列中的每一项都是对前一项的描述。你可以将其视作是由递归公式定义的数字字符串序列：
+
+countAndSay(1) = "1"
+countAndSay(n) 是对 countAndSay(n-1) 的描述，然后转换成另一个数字字符串。
 
 ```
 1.     1
@@ -4889,8 +4481,6 @@ class Solution(object):
 自顶向下的最小路径和为 11（即，2 + 3 + 5 + 1 = 11）。
 ```
 
-
-
 ```python
 import numpy as np
 class Solution(object):
@@ -5010,6 +4600,20 @@ class Solution(object):
 
 1. 每次转换只能改变一个字母。
 2. 转换过程中的中间单词必须是字典中的单词。
+
+```
+输入:
+beginWord = "hit",
+endWord = "cog",
+wordList = ["hot","dot","dog","lot","log","cog"]
+
+输出: 5
+
+解释: 一个最短转换序列是 "hit" -> "hot" -> "dot" -> "dog" -> "cog",
+     返回它的长度 5。
+```
+
+
 
 ```python
 import collections
@@ -5137,29 +4741,45 @@ class Solution(object):
 
 ### [133. 克隆图](https://leetcode-cn.com/problems/clone-graph/)
 
-给你无向 **[连通](https://baike.baidu.com/item/连通图/6460995?fr=aladdin)** 图中一个节点的引用，请你返回该图的 [**深拷贝**](https://baike.baidu.com/item/深拷贝/22785317?fr=aladdin)（克隆）。
+给你无向 **[连通](https://baike.baidu.com/item/连通图/6460995?fr=aladdin)** 图中一个节点的引用，请你返回该图的 [**深拷贝**](https://baike.baidu.com/item/深拷贝/22785317?fr=aladdin)（克隆）。图中的每个节点都包含它的值 `val`（`int`） 和其邻居的列表（`list[Node]`）。
+
+```
+class Node {
+    public int val;
+    public List<Node> neighbors;
+}
+```
+
+
 
 ```python
+import collections
+
 class Solution(object):
     def cloneGraph(self, node):
         root = node
         if node is None:
             return node
-            
+
         nodes = self.getNodes(node)
-        
+
         mapping = {}
+        # 创建每一个node对象的复制node，加入到字典中
         for node in nodes:
             mapping[node] = Node(node.val)
-        
+        # 再次遍历所有的节点，得到他的复制node，然后为复制node补充上neighbors
         for node in nodes:
             new_node = mapping[node]
             for neighbor in node.neighbors:
                 new_neighbor = mapping[neighbor]
                 new_node.neighbors.append(new_neighbor)
         return mapping[root]
-        
+
     def getNodes(self, node):
+        """ 输入一个node，获取和这个node相接的所有的nodes
+        :param node: 开始遍历的根结点
+        :return: 一个没有重复元素的set集合 result
+        """
         q = collections.deque([node])
         result = set([node])
         while q:
@@ -5180,16 +4800,19 @@ class Solution(object):
 ```python
 class Solution(object):
     def canCompleteCircuit(self, gas, cost):
-        length = len(gas)  
+        length = len(gas)
         if length == 0:
             return -1
-        
+
+        # if total distance is larger than total oil, the car cannot finish.
         diff = []
-        for i in xrange(length): diff.append(gas[i]-cost[i])
-        
+        for i in range(length):
+            diff.append(gas[i] - cost[i])
+
         if sum(diff) < 0:
             return -1
-        
+
+        # otherwise, check from every port and drive for a circle
         for index in range(length):
             result = True
             now = index
@@ -5204,7 +4827,6 @@ class Solution(object):
                     now += 1
             if result:
                 return index
-        
         return -1
 ```
 
@@ -5255,10 +4877,12 @@ class Solution(object):
         """
         if len(s) == 0:
             return False
-        
-        pd = [ False for i in range(len(s) + 1)]
+
+        # 动态规划，到这个位置上能不能由字典中的词分割出来
+        pd = [False for i in range(len(s) + 1)]
         pd[0] = True
-        
+
+        # 从当前位置往前找，看着这个位置上能否分割出来词
         for i in range(1, len(s) + 1):
             for j in range(i):
                 if pd[j] and s[j:i] in wordDict:
@@ -5270,6 +4894,34 @@ class Solution(object):
 
 
 ### [146. LRU缓存机制](https://leetcode-cn.com/problems/lru-cache/)
+
+运用你所掌握的数据结构，设计和实现一个  LRU (最近最少使用) 缓存机制 。
+实现 LRUCache 类：
+
+LRUCache(int capacity) 以正整数作为容量 capacity 初始化 LRU 缓存
+int get(int key) 如果关键字 key 存在于缓存中，则返回关键字的值，否则返回 -1 。
+void put(int key, int value) 如果关键字已经存在，则变更其数据值；如果关键字不存在，则插入该组「关键字-值」。当缓存容量达到上限时，它应该在写入新数据之前删除最久未使用的数据值，从而为新的数据值留出空间。
+
+```
+使用一个双端队列来实现
+int get(int key):
+	使用 index(key) 方法来找到第一个出现的位置
+	如果没有找到：返回-1
+	如果找到了：记录索引
+	          根据索引删除元素
+	          在队列的头部加入元素
+
+void put(int key, int value):
+	使用 index(key) 方法来找到第一个出现的位置
+	如果没找到： 如果cache满了：删除队尾的元素
+													在队首根据key value加入
+						 如果没满：在队首根据key value加入
+	如果找到了： 记录索引
+						 删除索引位置的元素
+						 在队首根据key value加入
+```
+
+
 
 
 
@@ -5286,6 +4938,7 @@ class Solution(object):
 ```python
 class Solution(object):
     def evalRPN(self, tokens):
+        # 就按照顺序一个一个往外取，遇到了计算符号就进行计算
         stack = []
         for i in tokens:
             if i not in ('+', '-', '*', '/'):
@@ -5328,7 +4981,9 @@ class Solution(object):
     def maxProduct(self, nums):
         if not nums:
             return None
+        # 记录全局的最大值，当前最大值和当前最小值
         global_max = prev_max = prev_min = nums[0]
+        # 每次更新当前最大值和当前最小值，然后和全局最大值进行比较
         for num in nums[1:]:
             if num > 0:
                 curt_max = max(num, prev_max * num)
@@ -5352,6 +5007,8 @@ class Solution(object):
 ```python
 class Solution(object):
     def findMin(self, nums):
+    		""" 通过查找单调递增的区间而进行二分
+    		"""
         if not nums:
             return -1
             
@@ -5381,6 +5038,9 @@ getMin() —— 检索栈中的最小元素。
 
 ```python
 class MinStack(object):
+  	"""
+  	用两个堆栈来实现。一个用来记录元素，一个用来记录当前最小的元素。
+  	"""
     def __init__(self):
         self.stack = []
         self.minStack = []
@@ -5416,6 +5076,11 @@ class MinStack(object):
 
 class Solution(object):
     def findPeakElement(self, A):
+        """
+        也是使用二分的思想。
+				我们首先是要确定数组的首尾的位置。
+				然后找到中点。如果中点位置是一个下坡，就往之前找。如果是个上坡，就往后找。否则，两边找都行。直到找到一个峰值点。
+				"""
         start, end = 0, len(A) - 1
         while start + 1 <  end:
             mid = (start + end) // 2
@@ -5441,6 +5106,7 @@ class Solution(object):
 ```python
 class Solution(object):
     def compareVersion(self, version1, version2):
+        # 按位进行比较
         v1_list = version1.split('.')
         v2_list = version2.split('.')
 
@@ -5464,29 +5130,33 @@ class Solution(object):
 class Solution(object):
     def fractionToDecimal(self, numerator, denominator):
         result = ""
-        if numerator/denominator < 0:
+        # 判断结果的正负性，然后进行标记
+        if numerator / denominator < 0:
             result += "-"
             numerator = abs(numerator)
             denominator = abs(denominator)
-        
+
+        # 如果刚好能够整除，直接输出结果
         if numerator % denominator == 0:
-            return result+str(numerator/denominator)
+            return result + str(numerator / denominator)
+        # 否则计算小数部分
         else:
-            result += str(numerator/denominator)
+            result += str(numerator / denominator)
             result += "."
-        
+
+        # 计算小数部分
         numerator = numerator % denominator
         Dict = {}
         i = len(result)
-        
-        while(numerator != 0):
-            if Dict.get(numerator) == None:
+
+        while numerator != 0:
+            if Dict.get(numerator) is None:
                 Dict[numerator] = i
             else:
                 i = Dict[numerator]
-                return result[:i]+"("+result[i:]+")"
-            numerator = 10*numerator
-            result += str(numerator/denominator)
+                return result[:i] + "(" + result[i:] + ")"
+            numerator = 10 * numerator
+            result += str(numerator / denominator)
             numerator = numerator % denominator
             i = i + 1
         return result
@@ -5512,7 +5182,7 @@ class Solution(object):
 ```python
 class Solution(object):
     def convertToTitle(self, n):
-        # write your code here
+        # 转化为ASCIIcode 推算
         return "" if n == 0 else self.convertToTitle((n - 1) / 26) + chr((n - 1) % 26 + ord('A'))
 ```
 
@@ -6855,6 +6525,7 @@ class Solution(object):
 class Solution(object):
     def freqAlphabets(self, s):
         """
+        每遇到一个数字就向堆栈中加入一个字符，如果遇到了#就从堆栈中取出两个然后加入新的
         :type s: str
         :rtype: str
         """
