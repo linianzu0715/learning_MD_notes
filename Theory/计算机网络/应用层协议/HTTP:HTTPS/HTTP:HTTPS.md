@@ -53,7 +53,7 @@ http://www.aspxfans.com:8080/news/index.asp?boardID=5&ID=24618&page=1#name
 |  方法   | 说明                                                         |
 | :-----: | :----------------------------------------------------------- |
 | OPTIONS | 返回服务器针对特定资源所支持的HTTP请求方法                   |
-|  HEAD   | 向服务器索要和GET请求相一致的响应，只不过响应体将不会被返回。这一方法可以在不必传输整个响应内容的情况家，就可以获取包含在响应消息头中的元信息 |
+|  HEAD   | 向服务器索要和GET请求相一致的响应，只不过响应体将不会被返回。这一方法可以在不必传输整个响应内容的情况下，就可以获取包含在响应消息头中的元信息 |
 |   GET   | 向特定的资源发出请求                                         |
 |  POST   | 向指定资源提交数据进行处理请求（例如提交表单或者上传文件）。数据被包含在请求体中。POST请求可能会导致新的资源的创建或者已有资源的修改。 |
 |   PUT   | 向指定资源位置上传新的内容                                   |
@@ -65,29 +65,27 @@ http://www.aspxfans.com:8080/news/index.asp?boardID=5&ID=24618&page=1#name
 
 ## HTTP请求报文
 
-一个HTTP请求报文由请求行（request line）、请求头部（header）、空行和请求数据4个部分组成。
+一个HTTP请求报文由请求行（request line）、请求头部（header）、空行和请求数据4个部分组成，下图给出了请求报文的一般格式。
+
+![](https://github.com/linianzu0715/learning_MD_notes/blob/main/Picture/请求报文.png?raw=true)
+
+＜request-line＞
+
+＜headers＞
+
+＜blank line＞
+
+[＜request-body＞]
+
+**1.请求行**
+
+请求行由请求方法字段、URL字段和HTTP协议版本字段3个字段组成，它们用空格分隔。例如，GET /index.html HTTP/1.1。HTTP协议的请求方法有GET、POST、HEAD、PUT、DELETE、OPTIONS、TRACE、CONNECT。详情参考请求方法。
 
 
 
-HTTP请求头和响应头
+**2.请求头部**
 
-HTTP 请求报文由3部分组成(请求行+请求头+请求体)
-
-
-
-##### HTTP请求报文：
-
-1. 是请求方法,GET和POST是最常见的HTTP方法,初次以外还包括 DELETE、HEAD、OPTIONS、PUT、TRACE，不过现在大部分的浏览器只支持GET和POST
-
-2. 是请求对应的URL地址,他和报文头的Host属性,组合起来是一个完整的请求URL
-
-3. 是协议民称和版本号
-
-4. 是报文头,有若干个属性,形式为key:val,服务端据此获取客户端信息
-
-5. 是报文体,它将一个页面表单中的组件值通过param1=val1&parma=2的键值对形式编码成一个格式化串,它承载多个请求参数的数据,不但报文头可以传递请求参数,URL也可以通过/chapter15/user.html? param1=value1&param2=value2”的方式传递数值
-
-##### HTTP请求报文头属性:
+请求头部由关键字/值对组成，每行一对，关键字和值用英文冒号“:”分隔。请求头部通知服务器有关于客户端请求的信息，典型的请求头有：
 
 - Accpet:告诉服务端,客户端接收什么类型的响应
 - Referer: 表示这是请求是从哪个URL进来的,比如想在网上购物,但是不知道选择哪家电商平台,你就去问度娘,说哪家电商的东西便宜啊,然后一堆东西弹出在你面前,第一给就是某宝,当你从这里进入某宝的时候,这个请求报文的Referer就是
@@ -99,29 +97,37 @@ HTTP 请求报文由3部分组成(请求行+请求头+请求体)
 - Host: 指定要请求的资源所在的主机和端口
 - User-Agent：告诉服务器，客户端使用的操作系统、浏览器版本和名称
 
-##### HTTP响应报文：
 
-响应报文与请求报文一样,由三个部分组成(响应行,响应头,响应体)
 
-![HTTP2](/Users/linianzu/Documents/learning_MD_notes/Picture/HTTP2.png)
+**3.空行**
 
-1. 报文协议及版本；
-2. 状态码及状态描述；
-3. 响应报文头，也是由多个属性组成；
-4. 响应报文体，即我们要的数据。
-
-##### HTTP响应报文属性
-
-- Cache-Control: 响应输出到客户端后,服务端通过该属性告诉客户端该怎么控制响应内容的缓存
-- ETag: 表示你请求资源的版本,如果该资源发生啦变化,那么这个属性也会跟着变
-- Location: 在重定向中或者创建新资源时使用
-- Set-Cookie: 服务端可以设置客户端的cookie
+最后一个请求头之后是一个空行，发送回车符和换行符，通知服务器以下不再有请求头。
 
 
 
-#### HTTP状态码:
+**4.请求数据**
 
-##### HTTP状态码分类：
+请求数据不在GET方法中使用，而是在POST方法中使用。POST方法适用于需要客户填写表单的场合。与请求数据相关的最常使用的请求头是Content-Type和Content-Length。
+
+
+
+## HTTP响应报文
+
+![](http://www.2cto.com/uploadfile/Collfiles/20160921/20160921092902557.jpg)
+
+
+
+同样的，HTTP响应报文也由三部分组成：响应行、响应头、响应体
+
+
+
+**1.响应行**
+
+响应行一般由协议版本、状态码及其描述组成 比如 HTTP/1.1 200 OK
+
+其中协议版本HTTP/1.1或者HTTP/1.0，200就是它的状态码，OK则为它的描述。
+
+HTTP状态码分类：
 
 | 分类 | 分类描述                                       |
 | :--: | :--------------------------------------------- |
@@ -131,7 +137,7 @@ HTTP 请求报文由3部分组成(请求行+请求头+请求体)
 | 4**  | 客户端错误，请求包含语法错误或无法完成请求     |
 | 5**  | 服务器错误，服务器在处理请求的过程中发生了错误 |
 
-##### 常见的HTTP状态码：
+常见的HTTP状态码：
 
 | 状态码 |               解释                |
 | :----: | :-------------------------------: |
@@ -142,7 +148,47 @@ HTTP 请求报文由3部分组成(请求行+请求头+请求体)
 
 
 
-#### HTTP的长连接和短连接
+**2.响应头**
+
+响应头用于描述服务器的基本信息，以及数据的描述，服务器通过这些数据的描述信息，可以通知客户端如何处理等一会儿它回送的数据。
+
+设置HTTP响应头往往和状态码结合起来。例如，有好几个表示“文档位置已经改变”的状态代码都伴随着一个Location头，而401(Unauthorized)状态代码则必须伴随一个WWW-Authenticate头。然而，即使在没有设置特殊含义的状态代码时，指定应答头也是很有用的。应答头可以用来完成：设置Cookie，指定修改日期，指示浏览器按照指定的间隔刷新页面，声明文档的长度以便利用持久HTTP连接，……等等许多其他任务。
+
+常见的响应头字段含义：
+
+1. Allow：服务器支持哪些请求方法(如GET、POST等)。
+2. Content-Encoding：文档的编码(Encode)方法。只有在解码之后才可以得到Content-Type头指定的内容类型。利用gzip压缩文档能够显著地减少HTML文档的下载时间。[Java](https://www.2cto.com/kf/ware/Java/)的GZIPOutputStream可以很方便地进行gzip压缩，但只有Unix上的Netscape和Windows上的IE4、IE5才支持它。因此，Servlet应该通过查看Accept-Encoding头(即request.getHeader(“Accept- Encoding”))检查浏览器是否支持gzip，为支持gzip的浏览器返回经gzip压缩的HTML页面，为其他浏览器返回普通页面。
+3. Content-Length：表示内容长度。只有当浏览器使用持久HTTP连接时才需要这个数据。如果你想要利用持久连接的优势，可以把输出文档写入 ByteArrayOutputStram，完成后查看其大小，然后把该值放入Content-Length头，最后通过byteArrayStream.writeTo(response.getOutputStream()发送内容。
+4. Content- Type：表示后面的文档属于什么MIME类型。Servlet默认为text/plain，但通常需要显式地指定为text/html。由于经常要设置 Content-Type，因此HttpServletResponse提供了一个专用的方法setContentType。
+5. Date：当前的GMT时间，例如，Date:Mon,31Dec200104:25:57GMT。Date描述的时间表示世界标准时，换算成本地时间，需要知道用户所在的时区。你可以用setDateHeader来设置这个头以避免转换时间格式的麻烦。
+6. Expires：告诉浏览器把回送的资源缓存多长时间，-1或0则是不缓存。
+7. Last-Modified：文档的最后改动时间。客户可以通过If-Modified-Since请求头提供一个日期，该请求将被视为一个条件GET，只有改动时间迟于指定时间的文档才会返回，否则返回一个304(Not Modified)状态。Last-Modified也可用setDateHeader方法来设置。
+8. Location：这个头配合302状态码使用，用于重定向接收者到一个新URI地址。表示客户应当到哪里去提取文档。Location通常不是直接设置的，而是通过HttpServletResponse的sendRedirect方法，该方法同时设置状态代码为302。
+9. Refresh：告诉浏览器隔多久刷新一次，以秒计。
+10. Server：服务器通过这个头告诉浏览器服务器的类型。Server响应头包含处理请求的原始服务器的软件信息。此域能包含多个产品标识和注释，产品标识一般按照重要性排序。Servlet一般不设置这个值，而是由Web服务器自己设置。
+11. Set-Cookie：设置和页面关联的Cookie。Servlet不应使用response.setHeader(“Set-Cookie”, …)，而是应使用HttpServletResponse提供的专用方法addCookie。
+12. Transfer-Encoding：告诉浏览器数据的传送格式。
+13. WWW-Authenticate：客户应该在Authorization头中提供什么类型的授权信息?在包含401(Unauthorized)状态行的应答中这个头是必需的。例如，response.setHeader(“WWW-Authenticate”, “BASIC realm=\”executives\”“)。注意Servlet一般不进行这方面的处理，而是让Web服务器的专门机制来控制受密码保护页面的访问。
+
+注：设置应答头最常用的方法是HttpServletResponse的setHeader，该方法有两个参数，分别表示应答头的名字和值。和设置状态代码相似，设置应答头应该在发送任何文档内容之前进行。
+
+setDateHeader方法和setIntHeadr方法专门用来设置包含日期和整数值的应答头，前者避免了把Java时间转换为GMT时间字符串的麻烦，后者则避免了把整数转换为字符串的麻烦。
+
+HttpServletResponse还提供了许多设置
+
+setContentType：设置Content-Type头。大多数Servlet都要用到这个方法。
+
+setContentLength：设置Content-Length头。对于支持持久HTTP连接的浏览器来说，这个函数是很有用的。
+
+addCookie：设置一个Cookie(Servlet API中没有setCookie方法，因为应答往往包含多个Set-Cookie头)。
+
+**3.响应体**
+
+响应体就是响应的消息体，如果是纯数据就是返回纯数据，如果请求的是HTML页面，那么返回的就是HTML代码，如果是JS就是JS代码，如此之类。
+
+
+
+## HTTP的长连接和短连接
 
 HTTP的长连接和短连接本质上是TCP长连接和短连接。HTTP属于应用层协议.
 
@@ -156,34 +202,35 @@ HTTP的长连接和短连接本质上是TCP长连接和短连接。HTTP属于应
 
 
 
-#### POST和GET请求的区别
+## 关于HTTP请求GET和POST的区别
 
-http请求方式有get、post、put、delete等多种，最常用的就是get和post。
+1.GET提交，请求的数据会附在URL之后（就是把数据放置在HTTP协议头＜request-line＞中），以?分割URL和传输数据，多个参数用&连接;例如：login.action?name=hyddd&password=idontknow&verify=%E4%BD%A0 %E5%A5%BD。如果数据是英文字母/数字，原样发送，如果是空格，转换为+，如果是中文/其他字符，则直接把字符串用BASE64加密，得出如： %E4%BD%A0%E5%A5%BD，其中％XX中的XX为该符号以16进制表示的ASCII。
 
-区别：
+ POST提交：把提交的数据放置在是HTTP包的包体＜request-body＞中。上文示例中红色字体标明的就是实际的传输数据
 
-1. GET请求一般用去请求获取数据， POST一般作为发送数据到后台时使用。
-2. GET请求也可传参到后台，但是其参数在浏览器的地址栏的url中可见，所以隐私性安全性较差，且参数长度也是有限制的。POST请求传递参数放在Request body中，不会在url中显示，比GET要安全，且参数长度无限制。
-3. GET请求刷新浏览器或回退时没有影响，POST回退时会重新提交数据请求。
-4. GET请求可被缓存，POST 请求不会被缓存
-5. GET 请求保留在浏览器历史记录中，POST 请求不会保留在浏览器历史记录中。
-6. GET 请求可被收藏为书签， POST 不能被收藏为书签
-7. GET请求只能进行url编码（application/x-www-form-urlencoded），POST支持多种编码方式（application/x-www-form-urlencoded 或 multipart/form-data。为二进制数据使用多重编码）
-8. GET请求比较常见的方式是通过url地址栏请求，POST最常见是通过form表单发送数据请求
+ 因此，GET提交的数据会在地址栏中显示出来，而POST提交，地址栏不会改变
 
-HTTP是基于TCP/IP的关于数据如何在万维网中如何通信的协议。HTTP的底层是TCP/IP。所以GET和POST的底层也是TCP/IP，也就是说，GET/POST都是TCP链接。GET和POST能做的事情是一样一样的。你要给GET加上request body，给POST带上url参数，技术上是完全行的通的。 
+ 
 
-GET和POST还有一个重大区别，简单的说：GET产生一个TCP数据包；POST产生两个TCP数据包。对于GET方式的请求，浏览器会把http header和data一并发送出去，服务器响应200（返回数据）；而对于POST，浏览器先发送header，服务器响应100 continue，浏览器再发送data，服务器响应200 ok（返回数据）。
+2.传输数据的大小：
 
-1. GET与POST都有自己的语义，不能随便混用。
+  首先声明,HTTP协议没有对传输的数据大小进行限制，HTTP协议规范也没有对URL长度进行限制。 而在实际开发中存在的限制主要有：
 
-2. 据研究，在网络环境好的情况下，发一次包的时间和发两次包的时间差别基本可以无视。而在网络环境差的情况下，两次包的TCP在验证数据包完整性上，有非常大的优点。
+  GET:特定浏览器和服务器对URL长度有限制，例如IE对URL长度的限制是2083字节(2K+35)。对于其他浏览器，如Netscape、FireFox等，理论上没有长度限制，其限制取决于操作系统的支持。
 
-3. 并不是所有浏览器都会在POST中发送两次包，Firefox就只发送一次。
+  因此对于GET提交时，传输数据就会受到URL长度的限制。
+
+  POST:由于不是通过URL传值，理论上数据不受限。但实际各个WEB服务器会规定对post提交数据大小进行限制，Apache、IIS6都有各自的配置。
+
+ 
+
+3.安全性：
+
+  POST的安全性要比GET的安全性高。注意：这里所说的安全性和上面GET提到的“安全”不是同个概念。上面“安全”的含义仅仅是不作数据修改，而这里安全的含义是真正的Security的含义，比如：通过GET提交数据，用户名和密码将明文出现在URL上，因为(1)登录页面有可能被浏览器缓存， (2)其他人查看浏览器的历史纪录，那么别人就可以拿到你的账号和密码了，
 
 
 
-#### HTTP和HTTPS
+## HTTP和HTTPS
 
 超文本传输协议HTTP协议被用于在Web浏览器和网站服务器之间传递信息，HTTP协议以明文方式发送内容，不提供任何方式的数据加密，如果攻击者截取了Web浏览器和网站服务器之间的传输报文，就可以直接读懂其中的信息，因此，HTTP协议不适合传输一些敏感信息，比如：信用卡号、密码等支付信息。
 

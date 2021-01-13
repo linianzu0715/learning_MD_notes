@@ -73,3 +73,45 @@ $ git config --global user.name "username"
 $ git config --global user.email "email"
 ```
 
+
+
+## 查看配置信息
+
+查看系统的配置信息：
+
+```
+git config --system --list
+```
+
+查看当前用户的配置信息：
+
+```
+git config --global  --list
+```
+
+查看当前仓库配置信息
+
+```
+git config --local  --list
+```
+
+
+
+## GIT修改用户名和邮箱：
+
+- 修改当前project
+  用户名的命令为：git config user.name 你的目标用户名;
+  提交邮箱命令为：git config user.email 你的目标邮箱名;
+- git修改全局项目
+  git config --global user.name你的目标用户名；
+  git config --global user.email 你的目标邮箱名;
+
+
+
+
+
+```
+PlatformOrderMsgListener
+
+PlatformPayFinishProcessor
+```
