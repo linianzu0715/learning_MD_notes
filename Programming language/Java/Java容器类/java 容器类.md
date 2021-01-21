@@ -1377,13 +1377,3 @@ Iterator对集合只能前向遍历，ListIterator可以前向遍历，也可以
 ListIterator实现了Iterator接口，并包含其他的功能，比如：增加元素，替换元素，获取前一个和后一个元素的索引等等。
 
 
-
-#### fail-fast和fail-safe的区别：
-
-fail-fast:
-
-当迭代器遍历一个集合对象时，如果遍历的过程中对集合对象的内容进行了修改，则会抛出 concurrent modification exception.
-
-fail-safe:
-
-在遍历时不是直接在集合内容上访问的，而是先复制原有集合内容，在副本上进行遍历。
