@@ -4966,6 +4966,7 @@ class Solution(object):
 
 ```python
 class Solution(object):
+    # 直接进行字符串的分割，然后翻转位置
     def reverseWords(self, s):
         return ' '.join(reversed(s.strip().split()))
 ```
@@ -5195,6 +5196,8 @@ class Solution(object):
 ```python
 class Solution(object):
     def majorityElement(self, nums):
+        # 循环这个数组，记录第一个数字
+        # 如果数字相同，就count+1 如果不相同，就count-1.
         storedNumber = None 
         counter = 1
         for num in nums:
@@ -5228,6 +5231,7 @@ class Solution(object):
 
 ```python
 class Solution(object):
+    # 换成 asc code 解码
     def titleToNumber(self, s):
         s = s[::-1]
         sum = 0
@@ -5250,6 +5254,7 @@ class Solution(object):
 
 ```python
 class Solution(object):
+    # 阶乘中的0的数目只取决于里面有多少个因数5
     def trailingZeroes(self, n):
         return 0 if n == 0 else n / 5 + self.trailingZeroes(n / 5)
 ```
@@ -5264,7 +5269,7 @@ class Solution(object):
 class Solution(object):
     def largestNumber(self, nums):
         nums.sort(key=cmp_to_key(lambda x, y: 1 if str(x)+str(y) > str(y)+str(x) else -1),reverse=True)
-        print(nums)
+        # 将最大的数字放在前面，小的数字放在后面
         if nums[0] == 0:
             return '0'
         return "".join([str(x) for x in nums]) 
@@ -5280,11 +5285,11 @@ class Solution(object):
 
 ```python
 class Solution(object):
+    # 添加入字典，查找字典中出现过超过一次的值
     def findRepeatedDnaSequences(self, s):
         dic, Str = {}, "x" + s[:9]
         for i in range(9,len(s)):
             Str = Str[1:] + s[i]
-            print(Str)
             if dic.get(Str) == None:
                 dic[Str] = 1
             else:
@@ -5328,7 +5333,6 @@ class Solution(object):
         f[0], f[1] = A[0], max(A[0], A[1])
         for i in range(2, len(A)):
             f[i] = max(f[i - 1], f[i - 2] + A[i])
-            
         return f[len(A) - 1]
 ```
 
