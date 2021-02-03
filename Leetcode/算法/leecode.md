@@ -5305,8 +5305,18 @@ class Solution(object):
 
 颠倒给定的 32 位无符号整数的二进制位。
 
+```
+输入: 00000010100101000001111010011100
+输出: 00111001011110000010100101000000
+解释: 输入的二进制串 00000010100101000001111010011100 表示无符号整数 43261596，
+     因此返回 964176192，其二进制表示形式为 00111001011110000010100101000000。
+```
+
+
+
 ```python
 class Solution:
+    # result初始化为0，result往左推，输入的数字n往右推动。直到n中的32位都被推完。每位按位进行and操作。
     def reverseBits(self, n):
         res = 0
         for i in range(32):
@@ -5324,6 +5334,7 @@ class Solution:
 
 ```python
 class Solution(object):
+    # 递推公式： f[i] = max(f[i - 1], f[i - 2] + A[i]) 到位置 i 为止 最多能够偷到多少钱。
     def rob(self, A):
         if not A:
             return 0
@@ -5375,6 +5386,8 @@ class Solution(object):
 
 ```python
 class Solution(object):
+    # 找到一个新的岛屿之后，把它的地方都标记上
+    # 遍历地图的所有的位置
     def numIslands(self, grid):
         if not grid or not grid[0]:
             return 0
@@ -5413,6 +5426,7 @@ class Solution(object):
 ```python
 class Solution(object):
     def isIsomorphic(self, s, t):
+        # 用两个字典来记录映射的一一对应的关系
         DictA = {}
         DictB = {}
         for i in range(len(s)):
@@ -5446,8 +5460,11 @@ class Solution(object):
 
 你这个学期必须选修 numCourse 门课程，记为 0 到 numCourse-1 。在选修某些课程之前需要一些先修课程。 例如，想要学习课程 0 ，你需要先完成课程 1 ，我们用一个匹配来表示他们：[0,1]
 
+给定课程总量以及它们的先决条件，请你判断是否可能完成所有课程的学习？
+
 ```python
 class Solution(object):
+    # 转化为图的问题，转化为图的开始点启动，能否达到所有的节点
     def canFinish(self, numCourses, prerequisites):
         edges = {i: [] for i in range(numCourses)}
         degrees = [0 for i in range(numCourses)] 
@@ -5478,6 +5495,7 @@ class Solution(object):
 
 ```python
 class Solution(object):
+    # 维护一个容量为K的数组
     def findKthLargest(self, nums, k):
         L = []
         for i in range(len(nums)):
@@ -5503,6 +5521,7 @@ class Solution(object):
 
 ```python
 class Solution(object):
+		# 用一个字典来维护这个数组中重复的数字，如果有，就加上它的值，然后判断其距离的绝对值
     def containsNearbyDuplicate(self, nums, k):
         Dict = {}
         for i in range(len(nums)):
@@ -5521,6 +5540,7 @@ class Solution(object):
 
 ```python
 class Solution(object):
+    # 递推公式 f[i][j] = min(f[i - 1][j], f[i][j - 1], f[i-1][j - 1]) + 1
     def maximalSquare(self, matrix):
         if not matrix or not matrix[0]:
             return 0
@@ -5554,6 +5574,8 @@ class Solution(object):
 
 ```python
 class Solution(object):
+    # 从右上角开始查找，如果比目标值小，就往下走，如果比目标值大，就往左走
+    # 同理也可以从左下角开始查找
     def searchMatrix(self, matrix, target):
         """
         :type matrix: List[List[int]]
