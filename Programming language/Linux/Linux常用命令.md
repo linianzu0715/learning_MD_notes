@@ -351,6 +351,8 @@ $ sudo -u yao vi ~www/index.html    //以 yao 用户身份编辑  home 目录下
 ```
 grep -i "the" demo_file              //在文件中查找字符串(不区分大小写)
 grep -A 3 -i "example" demo_text     //输出成功匹配的行，以及该行之后的三行
+grep -B 3 -i "example" demo_text     //输出成功匹配的行，以及该行之前的三行
+grep -c 3 -i "example" demo_text     //输出成功匹配的行，以及该行之前和之后的三行
 grep -r "ramesh" *                   //在一个文件夹中递归查询包含指定字符串的文件
 ```
 
