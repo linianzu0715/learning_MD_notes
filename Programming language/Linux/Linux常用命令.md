@@ -350,6 +350,7 @@ $ sudo -u yao vi ~www/index.html    //以 yao 用户身份编辑  home 目录下
 
 ```
 grep -i "the" demo_file              //在文件中查找字符串(不区分大小写)
+grep -i "the｜a" demo_file           //在文件中查找包括字符串“the”或者“a”的行，忽略大小写
 grep -A 3 -i "example" demo_text     //输出成功匹配的行，以及该行之后的三行
 grep -B 3 -i "example" demo_text     //输出成功匹配的行，以及该行之前的三行
 grep -c 3 -i "example" demo_text     //输出成功匹配的行，以及该行之前和之后的三行

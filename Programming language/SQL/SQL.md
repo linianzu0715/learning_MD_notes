@@ -404,3 +404,36 @@ expain出来的信息有10列，分别是id、select_type、table、type、possi
 • 部分统计信息是估算的，并非精确值
 • EXPALIN只能解释SELECT操作，其他操作要重写为SELECT后查看执行计划。**
 
+
+
+### NVL关键词
+
+**NVL(expr1, expr2)** : In SQL, NVL() converts a null value to an actual value. Data types that can be used are date, character and number. Data type must match with each other i.e. expr1 and expr2 must of same data type.
+**Syntax –**
+
+```
+NVL (expr1, expr2)
+```
+
+**expr1** is the source value or expression that may contain a null.
+**expr2** is the target value for converting the null.
+
+```sql
+SELECT  salary, NVL(commission_pct, 0),
+    (salary*12) + (salary*12*NVL(commission_pct, 0))
+      annual_salary FROM employees;
+```
+
+NVL(commission_pct, 0) 如果commission_pct字段中出现了空值null，则把空值转化为0。
+
+
+
+### COALESCE关键词
+
+**COALESCE()** :返回列表中第一个非null的值，如果列表中所有的值都是null，则返回null。
+
+**Syntax –**
+
+```
+COALESCE (expr_1, expr_2, ... expr_n)
+```
