@@ -47,6 +47,10 @@ Java
 
 Python
 
+Kafka
+
+SQL
+
 
 
 #### 快捷键：

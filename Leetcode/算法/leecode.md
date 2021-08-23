@@ -4310,6 +4310,48 @@ class Solution(object):
 
 
 
+97.交错字符串
+
+```python
+class Solution(object):
+    def isInterleave(self, s1, s2, s3):
+        """
+        :type s1: str
+        :type s2: str
+        :type s3: str
+        :rtype: bool
+        """
+        lenS1, lenS2, lenS3 = len(s1), len(s2), len(s3)
+        if (lenS1 + lenS2) != lenS3:
+            return False
+        indexS1 = indexS2 = indexS3 = 0
+        
+        
+        def isInterleaveHelper(indexS1, indexS2, indexS3):
+            while(indexS1 < lenS1 and indexS2 < lenS2 and indexS3 < lenS3):
+                #如果两个index都能匹配上，并且相同
+                if s1[indexS1] == s3[indexS3] and s2[indexS2] == s3[indexS3]:
+                    
+                #一边匹配上
+                elif s1[indexS1] == s3[indexS3]:
+                    indexS1 += 1
+                    indexS3 += 1
+                
+                #一边匹配上
+                elif s2[indexS2] == s3[indexS3]:
+                    indexS2 += 1
+                    indexS3 += 1
+                    
+                #两边都没有匹配上
+                else:
+                   
+                    
+```
+
+
+
+
+
 ### [115. 不同的子序列](https://leetcode-cn.com/problems/distinct-subsequences/)
 
 给定一个字符串 **S** 和一个字符串 **T**，计算在 **S** 的子序列中 **T** 出现的个数。一个字符串的一个子序列是指，通过删除一些（也可以不删除）字符且不干扰剩余字符相对位置所组成的新字符串。（例如，"ACE" 是 "ABCDE" 的一个子序列，而 "AEC" 不是）
