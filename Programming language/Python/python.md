@@ -86,3 +86,9 @@ range([start,] stop[, step])，根据start与stop指定的范围以及step设定
  xrange 用法与 range 完全相同，所不同的是生成的不是一个list对象，而是一个生成器。
 
 要生成很大的数字序列的时候，用xrange会比range性能优很多，因为不需要一上来就开辟一块很大的内存空间。
+
+
+
+
+
+假装修改一下
