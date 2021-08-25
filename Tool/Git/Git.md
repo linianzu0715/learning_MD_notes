@@ -98,7 +98,13 @@ git config --local  --list
 
 
 
-# 4、add指令执行的时候会发生什么？
+# 4、git add
+
+### 4.1 git add  指令的作用？
+
+就改动的内容加入到暂存区。
+
+### 4.2 指令执行的时候会发生什么？
 
 当对工作区修改（或新增）的文件执行 **git add** 命令时，暂存区的目录树被更新，同时工作区修改（或新增）的文件内容被写入到对象库中的一个新的对象中，而该对象的ID被记录在暂存区的文件索引中。
 
@@ -109,6 +115,24 @@ git config --local  --list
 ### 5.1 git commit 指令的作用？
 
 git commit 命令将暂存区内容添加到本地仓库中。
+
+
+
+### 5.2 git commit -m [message]?
+
+[message] 可以是一些备注信息，备注本次提交的改动。
+
+
+
+# 6、git clone 
+
+### 6.1 git clone复制代码？
+
+```shell
+git clone + (https link)
+```
+
+
 
 
 
