@@ -55,27 +55,7 @@ https://www.runoob.com/git/git-workflow.html
 
 
 
-1. 用户名和邮箱地址的作用：
-
-用户名和邮箱地址是本地 git 客户端的一个变量，不随git库而改变。每次commit都会用用户名和邮箱纪录。github的 contributions 统计就是按邮箱来统计的。
-
-2. 查看用户名和邮箱地址：
-
-```java
-$ git config user.name
-$ git config user.email
-```
-
-3. 修改用户名和邮箱地址：
-
-```shell
-$ git config --global user.name "username"
-$ git config --global user.email "email"
-```
-
-
-
-## 查看配置信息
+# 1、查看配置信息
 
 查看系统的配置信息：
 
@@ -97,7 +77,11 @@ git config --local  --list
 
 
 
-## GIT修改用户名和邮箱：
+# 2、GIT修改用户名和邮箱：
+
+用户名和邮箱地址是本地 git 客户端的一个变量，不随git库而改变。每次commit都会用用户名和邮箱纪录。github的 contributions 统计就是按邮箱来统计的。
+
+
 
 - 修改当前project
   用户名的命令为：git config user.name 你的目标用户名;
@@ -108,10 +92,23 @@ git config --local  --list
 
 
 
+# 3、删除本地分支
+
+通过 git branch -d \<branch> 删除一个分支，比如： git branch -d fix/authentication。 当一个分支被推送并合并到远程分支后， -d 才会在本地删除该分支。 如果一个分支还没有被推送或者合并，那么可以使用 -D 强制删除它。 这就是本地删除分支的方法。
 
 
-```
-PlatformOrderMsgListener
 
-PlatformPayFinishProcessor
-```
+# 4、add指令执行的时候会发生什么？
+
+当对工作区修改（或新增）的文件执行 **git add** 命令时，暂存区的目录树被更新，同时工作区修改（或新增）的文件内容被写入到对象库中的一个新的对象中，而该对象的ID被记录在暂存区的文件索引中。
+
+
+
+# 5、git commit
+
+### 5.1 git commit 指令的作用？
+
+git commit 命令将暂存区内容添加到本地仓库中。
+
+
+
