@@ -1,40 +1,4 @@
 # learning_MD_notes
-GItHub usage notes
-
-
-
-Procedure:
-
-1. Clone repository from git
-
-```shell
-git clone ...
-```
-
-2. Modify and change
-
-3. Add new modification
-
-```shell
-git add ...
-```
-
-4. Commit to remote repository
-
-```shell
-git commit -m XXX
-```
-
-5. Push to remote
-
-```shell
-git push
-```
-
-
-
-# 技术栈
-
 ### 基础知识：
 
 1. 操作系统
