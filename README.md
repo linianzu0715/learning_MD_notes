@@ -36,3 +36,9 @@ SQL
 ### 2、Programming language
 
 2.1 SQL https://github.com/linianzu0715/learning_MD_notes/blob/main/Programming%20language/SQL/SQL.md
+
+
+
+### 3、Testing
+
+3.1 测试理论 https://github.com/linianzu0715/learning_MD_notes/blob/main/Testing/测试理论.md
