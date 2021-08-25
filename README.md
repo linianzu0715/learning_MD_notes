@@ -30,3 +30,9 @@ SQL
 1.1 Git https://github.com/linianzu0715/learning_MD_notes/blob/main/Tool/Git/Git.md
 
 1.2 Docker https://github.com/linianzu0715/learning_MD_notes/blob/main/Tool/Docker/Docker.md
+
+
+
+### 2、Programming language
+
+2.1 SQL https://github.com/linianzu0715/learning_MD_notes/blob/main/Programming%20language/SQL/SQL.md
