@@ -1,99 +1,26 @@
 [toc]
 
-### SQL优化：
+# 1、数据库操作
 
-1. 在表中建立索引，优先考虑where、group by使用到的字段。
-
-2. 尽量避免使用select *，返回无用的字段会降低查询效率。如下：
-
-   ```sql
-   SELECT * FROM t 
-   ```
-
-   优化方式：使用具体的字段代替*，只返回使用到的字段。
-
-3. 尽量避免使用in 和not in，会导致数据库引擎放弃索引进行全表扫描。如下：
-
-   ```sql
-   SELECT * FROM t WHERE id IN (2,3)
-   
-   SELECT * FROM t1 WHERE username IN (SELECT username FROM t2)
-   ```
-
-   优化方式：如果是连续数值，可以用between代替。如下：
-
-   ```sql
-   SELECT * FROM t WHERE id BETWEEN 2 AND 3
-   ```
-
-   如果是子查询，可以用exists代替。如下：
-
-   ```sql
-   SELECT * FROM t1 WHERE EXISTS (SELECT * FROM t2 WHERE t1.username = t2.username)
-   ```
-
-4. 尽量避免使用or，会导致数据库引擎放弃索引进行全表扫描。如下：
-
-   ```sql
-   SELECT * FROM t WHERE id = 1 OR id = 3
-   ```
-
-   优化方式：可以用union代替or。如下：
-
-   ```sql
-   SELECT * FROM t WHERE id = 1
-   UNION
-   SELECT * FROM t WHERE id = 3
-   （PS：如果or两边的字段是同一个，如例子中这样。貌似两种方式效率差不多，即使union扫描的是索引，or扫描的是全表）
-   ```
-
-5. 尽量避免在字段开头模糊查询，会导致数据库引擎放弃索引进行全表扫描。如下：
-
-   ```sql
-   SELECT * FROM t WHERE username LIKE '%li%'
-   优化方式：尽量在字段后面使用模糊查询。如下：
-   SELECT * FROM t WHERE username LIKE 'li%'
-   ```
-
-6. 尽量避免在where条件中等号的左侧进行表达式、函数操作，会导致数据库引擎放弃索引进行全表扫描。如下：
-
-   ```sql
-   SELECT * FROM t2 WHERE score/10 = 9
-   SELECT * FROM t2 WHERE SUBSTR(username,1,2) = 'li'
-   优化方式：可以将表达式、函数操作移动到等号右侧。如下：
-   SELECT * FROM t2 WHERE score = 10*9
-   SELECT * FROM t2 WHERE username LIKE 'li%'
-   ```
-
-7. 当数据量大时，避免使用where 1=1的条件。通常为了方便拼装查询条件，我们会默认使用该条件，数据库引擎会放弃索引进行全表扫描。如下：
-
-   ```sql
-   SELECT * FROM t WHERE 1=1
-   ```
-
-   优化方式：用代码拼装sql时进行判断，没where加where，有where加and。
-
-
-
-### 创建数据库：
+### 1、创建数据库：
 
 ```sql
 CREATE DATABASE 数据库名;
 ```
 
-### 删除数据库：
+### 2、删除数据库：
 
 ```sql
 drop database <数据库名>;
 ```
 
-### 使用数据库：
+### 3、使用数据库：
 
 ```sql
 USE RUNOOB;
 ```
 
-### 创建数据表：
+### 4、创建数据表：
 
 ```sql
 CREATE TABLE table_name (column_name column_type);
@@ -110,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `runoob_tbl`(
 
 
 
-### 删除数据表：
+### 5、删除数据表：
 
 ```sql
 DROP TABLE table_name;
@@ -118,7 +45,7 @@ DROP TABLE table_name;
 
 
 
-### 插入数据：
+### 6、插入数据：
 
 ```sql
 INSERT INTO table_name ( field1, field2,...fieldN )
@@ -128,7 +55,9 @@ INSERT INTO table_name ( field1, field2,...fieldN )
 
 
 
-### UPDATE 更新:
+# 2、关键词
+
+### 2.1 UPDATE :
 
 如果我们需要修改或更新 MySQL 中的数据，我们可以使用 SQL UPDATE 命令来操作。
 
@@ -141,7 +70,7 @@ UPDATE runoob_tbl SET runoob_title='学习 C++' WHERE runoob_id=3;
 
 
 
-### DELETE 语句
+### 2.2 DELETE
 
 ```
 DELETE FROM table_name [WHERE Clause]
@@ -149,7 +78,7 @@ DELETE FROM table_name [WHERE Clause]
 
 
 
-### LIKE语句：
+### 2.2 LIKE
 
 ```sql
 SELECT field1, field2,...fieldN 
@@ -164,36 +93,9 @@ MySQL提供两个通配符，用于与`LIKE`运算符一起使用，它们分别
 
 
 
-### MySQL 事务
-
-MySQL 事务主要用于处理操作量大，复杂度高的数据。比如说，在人员管理系统中，你删除一个人员，你既需要删除人员的基本资料，也要删除和该人员相关的信息，如信箱，文章等等，这样，这些数据库操作语句就构成一个事务！
-
-- 在 MySQL 中只有使用了 Innodb 数据库引擎的数据库或表才支持事务。
-- 事务处理可以用来维护数据库的完整性，保证成批的 SQL 语句要么全部执行，要么全部不执行。
-- 事务用来管理 insert,update,delete 语句
-
-MySQL 事务主要用于处理操作量大，复杂度高的数据。比如说，在人员管理系统中，你删除一个人员，你既需要删除人员的基本资料，也要删除和该人员相关的信息，如信箱，文章等等，这样，这些数据库操作语句就构成一个事务！
-
-- 在 MySQL 中只有使用了 Innodb 数据库引擎的数据库或表才支持事务。
-- 事务处理可以用来维护数据库的完整性，保证成批的 SQL 语句要么全部执行，要么全部不执行。
-- 事务用来管理 insert,update,delete 语句
-
-MYSQL 事务处理主要有两种方法：
-
-1、用 BEGIN, ROLLBACK, COMMIT来实现
-
-- **BEGIN** 开始一个事务
-- **ROLLBACK** 事务回滚
-- **COMMIT** 事务确认
-
-2、直接用 SET 来改变 MySQL 的自动提交模式: 
-
-- **SET AUTOCOMMIT=0** 禁止自动提交
-- **SET AUTOCOMMIT=1** 开启自动提交
 
 
-
-### MySQL ALTER命令
+### 2.3 ALTER
 
 当我们需要修改数据表名或者修改数据表字段时，就需要使用到MySQL ALTER命令。
 
@@ -230,74 +132,7 @@ mysql> ALTER TABLE testalter_tbl
 
 
 
-### MySQL 索引
-
-MySQL索引的建立对于MySQL的高效运行是很重要的，索引可以大大提高MySQL的检索速度。拿汉语字典的目录页（索引）打比方，我们可以按拼音、笔画、偏旁部首等排序的目录（索引）快速查找到需要的字。
-
-索引分单列索引和组合索引。单列索引，即一个索引只包含单个列，一个表可以有多个单列索引，但这不是组合索引。组合索引，即一个索引包含多个列。创建索引时，你需要确保该索引是应用在 SQL 查询语句的条件(一般作为 WHERE 子句的条件)。实际上，索引也是一张表，该表保存了主键与索引字段，并指向实体表的记录。
-
-上面都在说使用索引的好处，但过多的使用索引将会造成滥用。因此索引也会有它的缺点：虽然索引大大提高了查询速度，同时却会降低更新表的速度，如对表进行INSERT、UPDATE和DELETE。因为更新表时，MySQL不仅要保存数据，还要保存一下索引文件。建立索引会占用磁盘空间的索引文件。
-
-**创建索引**
-
-```sql
-CREATE INDEX index_name ON table_name;
-```
-
-
-
-**单列索引**：单列索引基于单一的字段创建，其基本语法如下所示：
-
-```sql
-CREATE INDEX index_name ON table_name (column_name);
-```
-
-
-
-**唯一索引**：唯一索引不止用于提升查询性能，还用于保证数据完整性。唯一索引不允许向表中插入任何重复值。其基本语法如下所示：
-
-```sql
-CREATE UNIQUE INDEX index_name on table_name (column_name);
-```
-
-创建唯一索引的目的不是为了提高访问速度，而只是为了避免数据出现重复。唯一索引可以有多个但索引列的值必须唯一，索引列的值允许有空值。如果能确定某个数据列将只包含彼此各不相同的值，在为这个数据列创建索引的时候就应该使用关键字UNIQUE把它定义为一个唯一索引。
-
-
-
-**聚簇索引**：聚簇索引在表中两个或更多的列的基础上建立。其基本语法如下所示：
-
-```sql
-CREATE INDEX index_name on table_name (column1, column2);
-```
-
-创建单列索引还是聚簇索引，要看每次查询中，哪些列在作为过滤条件的 WHERE 子句中最常出现。如果只需要一列，那么就应当创建单列索引。如果作为过滤条件的 WHERE 子句用到了两个或者更多的列，那么聚簇索引就是最好的选择。
-
-
-
-**隐式索引**：隐式索引由数据库服务器在创建某些对象的时候自动生成。例如，对于主键约束和唯一约束，数据库服务器就会自动创建索引。
-
-
-
-**DROP INDEX 命令：**
-
-索引可以用 SQL **DROP** 命令删除。删除索引时应当特别小心，数据库的性能可能会因此而降低或者提高。
-
-```sql
-DROP INDEX table_name.index_name;
-```
-
-
-
-**什么时候应当避免使用索引？**
-
-尽管创建索引的目的是提升数据库的性能，但是还是有一些情况应当避免使用索引。下面几条指导原则给出了何时应当重新考虑是否使用索引：
-
-- 小的数据表不应当使用索引；
-- 需要频繁进行大批量的更新或者插入操作的表；
-- 如果列中包含大数或者 NULL 值，不宜创建索引；
-- 频繁操作的列不宜创建索引。
-
-### EXPLAIN关键词
+### 2.4 EXPLAIN
 
 在日常工作中，我们会有时会开慢查询去记录一些执行时间比较久的SQL语句，找出这些SQL语句并不意味着完事了，些时我们常常用到explain这个命令来查看一个这些SQL语句的执行计划，查看该SQL语句有没有使用上了索引，有没有做全表扫描，这都可以通过explain命令来查看。所以我们深入了解MySQL的基于开销的优化器，还可以获得很多可能被优化器考虑到的访问策略的细节，以及当运行SQL语句时哪种策略预计会被优化器采用。（QEP：sql生成一个执行计划query Execution plan）
 
@@ -406,7 +241,7 @@ expain出来的信息有10列，分别是id、select_type、table、type、possi
 
 
 
-### NVL关键词
+### 2.5 NVL
 
 **NVL(expr1, expr2)** : In SQL, NVL() converts a null value to an actual value. Data types that can be used are date, character and number. Data type must match with each other i.e. expr1 and expr2 must of same data type.
 **Syntax –**
@@ -428,7 +263,7 @@ NVL(commission_pct, 0) 如果commission_pct字段中出现了空值null，则把
 
 
 
-### COALESCE关键词
+### 2.6 COALESCE
 
 **COALESCE()** :返回列表中第一个非null的值，如果列表中所有的值都是null，则返回null。
 
@@ -437,3 +272,169 @@ NVL(commission_pct, 0) 如果commission_pct字段中出现了空值null，则把
 ```
 COALESCE (expr_1, expr_2, ... expr_n)
 ```
+
+
+
+
+
+# 3、SQL优化
+
+1. 在表中建立索引，优先考虑where、group by使用到的字段。
+
+2. 尽量避免使用select *，返回无用的字段会降低查询效率。如下：
+
+    ```sql
+    SELECT * FROM t 
+    ```
+
+    优化方式：使用具体的字段代替*，只返回使用到的字段。
+
+3. 尽量避免使用in 和not in，会导致数据库引擎放弃索引进行全表扫描。如下：
+
+    ```sql
+    SELECT * FROM t WHERE id IN (2,3)
+    
+    SELECT * FROM t1 WHERE username IN (SELECT username FROM t2)
+    ```
+
+    优化方式：如果是连续数值，可以用between代替。如下：
+
+    ```sql
+    SELECT * FROM t WHERE id BETWEEN 2 AND 3
+    ```
+
+    如果是子查询，可以用exists代替。如下：
+
+    ```sql
+    SELECT * FROM t1 WHERE EXISTS (SELECT * FROM t2 WHERE t1.username = t2.username)
+    ```
+
+4. 尽量避免使用or，会导致数据库引擎放弃索引进行全表扫描。如下：
+
+    ```sql
+    SELECT * FROM t WHERE id = 1 OR id = 3
+    ```
+
+    优化方式：可以用union代替or。如下：
+
+    ```sql
+    SELECT * FROM t WHERE id = 1
+    UNION
+    SELECT * FROM t WHERE id = 3
+    （PS：如果or两边的字段是同一个，如例子中这样。貌似两种方式效率差不多，即使union扫描的是索引，or扫描的是全表）
+    ```
+
+5. 尽量避免在字段开头模糊查询，会导致数据库引擎放弃索引进行全表扫描。如下：
+
+    ```sql
+    SELECT * FROM t WHERE username LIKE '%li%'
+    优化方式：尽量在字段后面使用模糊查询。如下：
+    SELECT * FROM t WHERE username LIKE 'li%'
+    ```
+
+6. 尽量避免在where条件中等号的左侧进行表达式、函数操作，会导致数据库引擎放弃索引进行全表扫描。如下：
+
+    ```sql
+    SELECT * FROM t2 WHERE score/10 = 9
+    SELECT * FROM t2 WHERE SUBSTR(username,1,2) = 'li'
+    优化方式：可以将表达式、函数操作移动到等号右侧。如下：
+    SELECT * FROM t2 WHERE score = 10*9
+    SELECT * FROM t2 WHERE username LIKE 'li%'
+    ```
+
+7. 当数据量大时，避免使用where 1=1的条件。通常为了方便拼装查询条件，我们会默认使用该条件，数据库引擎会放弃索引进行全表扫描。如下：
+
+    ```sql
+    SELECT * FROM t WHERE 1=1
+    ```
+
+    优化方式：用代码拼装sql时进行判断，没where加where，有where加and。
+
+
+
+# 4、索引
+
+MySQL索引的建立对于MySQL的高效运行是很重要的，索引可以大大提高MySQL的检索速度。拿汉语字典的目录页（索引）打比方，我们可以按拼音、笔画、偏旁部首等排序的目录（索引）快速查找到需要的字。
+
+索引分单列索引和组合索引。单列索引，即一个索引只包含单个列，一个表可以有多个单列索引，但这不是组合索引。组合索引，即一个索引包含多个列。创建索引时，你需要确保该索引是应用在 SQL 查询语句的条件(一般作为 WHERE 子句的条件)。实际上，索引也是一张表，该表保存了主键与索引字段，并指向实体表的记录。
+
+上面都在说使用索引的好处，但过多的使用索引将会造成滥用。因此索引也会有它的缺点：虽然索引大大提高了查询速度，同时却会降低更新表的速度，如对表进行INSERT、UPDATE和DELETE。因为更新表时，MySQL不仅要保存数据，还要保存一下索引文件。建立索引会占用磁盘空间的索引文件。
+
+**创建索引**
+
+```sql
+CREATE INDEX index_name ON table_name;
+```
+
+
+
+**单列索引**：单列索引基于单一的字段创建，其基本语法如下所示：
+
+```sql
+CREATE INDEX index_name ON table_name (column_name);
+```
+
+
+
+**唯一索引**：唯一索引不止用于提升查询性能，还用于保证数据完整性。唯一索引不允许向表中插入任何重复值。其基本语法如下所示：
+
+```sql
+CREATE UNIQUE INDEX index_name on table_name (column_name);
+```
+
+创建唯一索引的目的不是为了提高访问速度，而只是为了避免数据出现重复。唯一索引可以有多个但索引列的值必须唯一，索引列的值允许有空值。如果能确定某个数据列将只包含彼此各不相同的值，在为这个数据列创建索引的时候就应该使用关键字UNIQUE把它定义为一个唯一索引。
+
+
+
+**聚簇索引**：聚簇索引在表中两个或更多的列的基础上建立。其基本语法如下所示：
+
+```sql
+CREATE INDEX index_name on table_name (column1, column2);
+```
+
+创建单列索引还是聚簇索引，要看每次查询中，哪些列在作为过滤条件的 WHERE 子句中最常出现。如果只需要一列，那么就应当创建单列索引。如果作为过滤条件的 WHERE 子句用到了两个或者更多的列，那么聚簇索引就是最好的选择。
+
+
+
+**隐式索引**：隐式索引由数据库服务器在创建某些对象的时候自动生成。例如，对于主键约束和唯一约束，数据库服务器就会自动创建索引。
+
+
+
+**什么时候应当避免使用索引？**
+
+尽管创建索引的目的是提升数据库的性能，但是还是有一些情况应当避免使用索引。下面几条指导原则给出了何时应当重新考虑是否使用索引：
+
+- 小的数据表不应当使用索引；
+- 需要频繁进行大批量的更新或者插入操作的表；
+- 如果列中包含大数或者 NULL 值，不宜创建索引；
+- 频繁操作的列不宜创建索引。
+
+
+
+# 5、MySQL 事务
+
+MySQL 事务主要用于处理操作量大，复杂度高的数据。比如说，在人员管理系统中，你删除一个人员，你既需要删除人员的基本资料，也要删除和该人员相关的信息，如信箱，文章等等，这样，这些数据库操作语句就构成一个事务！
+
+- 在 MySQL 中只有使用了 Innodb 数据库引擎的数据库或表才支持事务。
+- 事务处理可以用来维护数据库的完整性，保证成批的 SQL 语句要么全部执行，要么全部不执行。
+- 事务用来管理 insert,update,delete 语句
+
+MySQL 事务主要用于处理操作量大，复杂度高的数据。比如说，在人员管理系统中，你删除一个人员，你既需要删除人员的基本资料，也要删除和该人员相关的信息，如信箱，文章等等，这样，这些数据库操作语句就构成一个事务！
+
+- 在 MySQL 中只有使用了 Innodb 数据库引擎的数据库或表才支持事务。
+- 事务处理可以用来维护数据库的完整性，保证成批的 SQL 语句要么全部执行，要么全部不执行。
+- 事务用来管理 insert,update,delete 语句
+
+MYSQL 事务处理主要有两种方法：
+
+1、用 BEGIN, ROLLBACK, COMMIT来实现
+
+- **BEGIN** 开始一个事务
+- **ROLLBACK** 事务回滚
+- **COMMIT** 事务确认
+
+2、直接用 SET 来改变 MySQL 的自动提交模式: 
+
+- **SET AUTOCOMMIT=0** 禁止自动提交
+- **SET AUTOCOMMIT=1** 开启自动提交
+
