@@ -37,6 +37,8 @@ SQL
 
 2.1 SQL https://github.com/linianzu0715/learning_MD_notes/blob/main/Programming%20language/SQL/SQL.md
 
+2.2 Java https://github.com/linianzu0715/learning_MD_notes/blob/main/Programming%20language/Java/Java_SE.md
+
 
 
 ### 3、Testing
