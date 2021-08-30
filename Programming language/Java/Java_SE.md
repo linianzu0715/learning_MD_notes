@@ -8,6 +8,8 @@
 
 [3、方法重载和方法重写](#3、方法重载和方法重写)
 
+[4、字符串](#4、字符串)
+
 ## 正则表达式
 
 * 正则表达式定义了字符串的模式。
@@ -1173,15 +1175,16 @@ public class Charactor extends Person {
 
 
 
+# <span id="4、字符串">4、字符串</span>
+
+### 4.1 String，StringBuffer, StringBuilder区别？
+
+1. String是用final修饰的，不可继承，不可修改。StringBuffer和StringBuilder提供了insert，append，delete，substring等方法可以改变字符串的值。因此String是不可变类，StringBuffer和StringBuilder是可变类。
+2. StringBuilder和StringBuffer引入的时间不一样。StringBuffer是在Java1.0被引入的，StringBuilder是发现StringBuffer的缺点之后，在1.5引入的。
+3. StringBuffer是同步的，因此是线程安全的。但是性能差。StringBuilder是非同步的，因此是非线程安全的，但是性能比较好。
+4. StringBuffer相较于StringBuilder有一些额外的方法：substring，length，capacity，trimToSize等。但是这些方法在String中也有。
 
 
-## 字符串
-
-### String，StringBuffer, StringBuilder继承结构：
-
-
-
-### String，StringBuffer, StringBuilder区别：
 
 
 
