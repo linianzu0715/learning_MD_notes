@@ -1232,25 +1232,25 @@ public class Charactor extends Person {
 
 
 
-### 线程同步和线程调度的方法
+### 5.4 线程同步和线程调度的方法
 
-wait():使线程处于等待（阻塞）状态。并且释放所持有的对象的锁
+* wait()：使线程处于等待（阻塞）状态。并且释放所持有的对象的锁
 
-sleep():使一个正在运行的线程进入睡眠状态，是一个静态方法，调用这个方法不需要处理interruptdException
+* sleep()：使一个正在运行的线程进入睡眠状态，是一个静态方法，调用这个方法不需要处理interruptdException
 
-notify():唤醒一个处于等待状态的线程，当然在调用这个方法的时候，并不能确切的唤醒某一个等待的线程，而是有JVM决定唤醒哪一个线程，而且和线程的有限级别无关。
+* notify():唤醒一个处于等待状态的线程，当然在调用这个方法的时候，并不能确切的唤醒某一个等待的线程，而是有JVM决定唤醒哪一个线程，而且和线程的有限级别无关。
 
-notifyAll():唤醒所有处于等待状态的线程，该方法不是将对象的所给所有线程，而是让他们竞争，只有获得锁的线程能够进入就绪状态。
+* notifyAll():唤醒所有处于等待状态的线程，该方法不是将对象的所给所有线程，而是让他们竞争，只有获得锁的线程能够进入就绪状态。
 
 
 
-### 当一个线程进入对象的synchronized方法A之后，其他的线程能够进入synchronized方法B么？
+### 5.5 当线程进入对象的synchronized方法A之后，其他线程能进入synchronized方法B么？
 
 不能，其他的线程只能访问该对象的非同步方法，同步方法不能访问。
 
 
 
-### 线程从创立到死亡的几种状态
+### 5.6 线程创立到死亡的几种状态
 
 1. 新建（new）
 
@@ -1269,7 +1269,13 @@ notifyAll():唤醒所有处于等待状态的线程，该方法不是将对象�
 
 
 
-### 启动线程的方式
+### 5.6 启动线程的方式
+
+
+
+
+
+### 5.7 Runnable和Callable的区别？
 
 Runnable和Callable的区别是，
 (1)Callable规定的方法是call(),Runnable规定的方法是run().
@@ -1374,7 +1380,9 @@ Thread oneThread = new Thread(oneTask);
 oneThread.start();
 ```
 
-### 公平锁和非公平锁
+
+
+### 5.8 公平锁和非公平锁？
 
 公平锁：当线程释放锁时，会在队列中查找，队列的头部的线程会得到锁。有新的线程请求锁时，将会排到队伍的末尾
 
@@ -1394,6 +1402,75 @@ oneThread.start();
 | 性能     | 少量同步                                                     | 大量同步                                                     |
 
 
+
+### 5.9 银行存款实现同步的例子
+
+**1、假设有一个银行存款的方法，我们没有对它进行同步处理**
+
+```java
+import java.io.Serializable;
+public class Account implements Serializable {
+    private double balance; // 账户余额
+    public void deposit(double money) {
+        double newBalance = balance + money;
+    try {
+        Thread.sleep(10); // 模拟此业务需要一段处理时间
+         }catch(InterruptedException ex) {
+        ex.printStackTrace();
+    }
+         balance = newBalance;
+    }
+ 
+    public double getBalance() {
+        return balance;
+    }
+ 
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+}
+```
+
+存款的线程类
+
+```java
+public class AddMoneyThread implements Runnable{
+    private  Account account;//存入账户
+    private double money;//存入金额
+    public AddMoneyThread(Account account,double money){
+        this.account=account;
+        this.money=money;
+    }
+    @Override
+    public void run() {
+        account.deposit(money);
+    }
+}
+```
+
+在没有加同步的情况下测试：
+
+```java
+public class NonSyncTest {
+    public static void main(String[] args) {
+        Account account = new Account();
+        ExecutorService service = Executors.newFixedThreadPool(100);
+        for (int i = 1; i <= 100; i++) {
+            service.execute(new AddMoneyThread(account, 1));
+        }
+        service.shutdown();
+        while (!service.isTerminated()) {
+        }
+        System.out.println("账户余额: " + account.getBalance());
+    }
+}
+```
+
+最终结果：
+
+账户余额: 6元。
+
+**2、为每个银行账户创建一个锁对象，在存款操作进行加锁和解锁**
 
 
 
@@ -1580,7 +1657,7 @@ JVM 的方法调用指令有五个，分别是：
 
 
 
-### 内部类是否可以引用他包含类的成员，如果可以，有什么限制？
+### 内部类是否可以引用外部类的成员，如果可以，有什么限制？
 
 内部类对象可以访问创建它的外部类对象的内容，内部类如果不是static的，那么他可以访问创建它的外部类对象的所有属性。如果内部类是static的，那么即为nested class。那么它只可以访问创建它的外部类对象的所有static属性。一般普通类只有public或者package的访问修饰，而内部类可以实现static，protected，private的访问修饰。当从外部类继承的时候，内部类是不会被覆盖的，他们是完全独立的实体，每个都在自己的命名空间中。如果从内部类中明确的继承，就可以覆盖原来内部类的方法。
 
