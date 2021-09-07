@@ -1,3 +1,5 @@
+
+
 ## 目录
 
 [toc]
@@ -1471,6 +1473,87 @@ public class NonSyncTest {
 账户余额: 6元。
 
 **2、为每个银行账户创建一个锁对象，在存款操作进行加锁和解锁**
+
+`ReentrantLock`是Java代码实现的锁，我们就必须先获取锁，然后在`finally`中正确释放锁。
+
+```java
+import java.io.Serializable;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class Account implements Serializable {
+    private Lock accountLock = new ReentrantLock();
+    private double balance; // 账户余额
+    public void deposit(double money) {
+        accountLock.lock();//加锁
+        try {
+        double newBalance = balance + money;
+        try {
+            Thread.sleep(10); // 模拟此业务需要一段处理时间
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        balance = newBalance;
+        }finally {
+            accountLock.unlock();//解锁
+        }
+    }
+ 
+    public double getBalance() {
+        return balance;
+    }
+ 
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+}
+```
+
+**3、在账户的存款方法上加入synchronized关键字**
+
+```java
+import java.io.Serializable;
+public class Account implements Serializable {
+    private double balance; // 账户余额
+    
+    public synchronized void deposit(double money) {//用synchronized关键字修饰方法
+        double newBalance = balance + money;
+    try {
+        Thread.sleep(10); // 模拟此业务需要一段处理时间
+         }catch(InterruptedException ex) {
+        ex.printStackTrace();
+    }
+         balance = newBalance;
+    }
+ 
+    public double getBalance() {
+        return balance;
+    }
+ 
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+}
+```
+
+**4、在调用存款方法的时候对账户进行同步**
+
+```java
+public class AddMoneyThread implements Runnable{
+    private  Account account;//存入账户
+    private double money;//存入金额
+    public AddMoneyThread(Account account,double money){
+        this.account=account;
+        this.money=money;
+    }
+    @Override
+    public void run() {
+        synchronized(account){ //在线程调用存款方法时对银行账户进行同步
+            account.deposit(money);
+        }
+    }
+}
+```
 
 
 

@@ -873,9 +873,102 @@ array和ArrayList都有从零开始的索引，即第一个元素从第零个索
 
 #### HashMap
 
+### 1、简单介绍一下底层原理？
+
+在JDK1.7及之前，是用数组加链表的方式存储的。当链表的长度特别长的时候，查询效率将直线下降，查询的时间复杂度为 O(n)。因此，JDK1.8 把它设计为达到一个特定的阈值之后，就将链表转化为红黑树。
+
+|                 |                                      |                                                              |
+| --------------- | ------------------------------------ | ------------------------------------------------------------ |
+| 图解HashMap结构 | ![图片](java 容器类.assets/640.jpeg) | 在元素数目达到阈值之前存储结构为链表，达到阈值之后结构遍为红黑树。 |
+
+
+
+### 2、常用的HashMap属性
+
+```java
+//默认的初始化容量为16，必须是2的n次幂
+static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16
+
+//最大容量为 2^30
+static final int MAXIMUM_CAPACITY = 1 << 30;
+
+//默认的加载因子0.75，乘以数组容量得到的值，用来表示元素个数达到多少时，需要扩容。
+//为什么设置 0.75 这个值呢，简单来说就是时间和空间的权衡。
+//若小于0.75如0.5，则数组长度达到一半大小就需要扩容，空间使用率大大降低，
+//若大于0.75如0.8，则会增大hash冲突的概率，影响查询效率。
+static final float DEFAULT_LOAD_FACTOR = 0.75f;
+
+//刚才提到了当链表长度过长时，会有一个阈值，超过这个阈值8就会转化为红黑树
+static final int TREEIFY_THRESHOLD = 8;
+
+//当红黑树上的元素个数，减少到6个时，就退化为链表
+static final int UNTREEIFY_THRESHOLD = 6;
+
+//链表转化为红黑树，除了有阈值的限制，还有另外一个限制，需要数组容量至少达到64，才会树化。
+//这是为了避免，数组扩容和树化阈值之间的冲突。
+static final int MIN_TREEIFY_CAPACITY = 64;
+
+//存放所有Node节点的数组
+transient Node<K,V>[] table;
+
+//存放所有的键值对
+transient Set<Map.Entry<K,V>> entrySet;
+
+//map中的实际键值对个数，即数组中元素个数
+transient int size;
+
+//每次结构改变时，都会自增，fail-fast机制，这是一种错误检测机制。
+//当迭代集合的时候，如果结构发生改变，则会发生 fail-fast，抛出异常。
+transient int modCount;
+
+//数组扩容阈值
+int threshold;
+
+//加载因子
+final float loadFactor;					
+
+//普通单向链表节点类
+static class Node<K,V> implements Map.Entry<K,V> {
+	//key的hash值，put和get的时候都需要用到它来确定元素在数组中的位置
+	final int hash;
+	final K key;
+	V value;
+	//指向单链表的下一个节点
+	Node<K,V> next;
+
+	Node(int hash, K key, V value, Node<K,V> next) {
+		this.hash = hash;
+		this.key = key;
+		this.value = value;
+		this.next = next;
+	}
+}
+
+//转化为红黑树的节点类
+static final class TreeNode<K,V> extends LinkedHashMap.Entry<K,V> {
+	//当前节点的父节点
+	TreeNode<K,V> parent;
+	//左孩子节点
+	TreeNode<K,V> left;
+	//右孩子节点
+	TreeNode<K,V> right;
+	//指向前一个节点
+	TreeNode<K,V> prev;    // needed to unlink next upon deletion
+	//当前节点是红色或者黑色的标识
+	boolean red;
+	TreeNode(int hash, K key, V val, Node<K,V> next) {
+		super(hash, key, val, next);
+	}
+}	
+```
+
+
+
+
+
 ##### HashMap底层实现原理
 
-哈希表（hash table）也叫散列表，是一种非常重要的数据结构，应用场景及其丰富，许多缓存技术（比如memcached）的核心其实就是在内存中维护一张大的哈希表。
+哈希表（hash table）也叫散列表，是一种非常重要的数据结构，应用场景及其丰富，许多缓存技术（比如memcached）的核心其实就是在内存中维护一张大的哈希表。但是，众所周知，当链表的长度特别长的时候，查询效率将直线下降，查询的时间复杂度为 O(n)。因此，JDK1.8 把它设计为达到一个特定的阈值之后，就将链表转化为红黑树。
 
 
 
